@@ -6,24 +6,9 @@ freestanding_env['CFLAGS']  = "-Os -minline-all-stringops -m32 -march=pentium -m
 freestanding_env['CFLAGS'] += " -ffunction-sections -fomit-frame-pointer -mregparm=3 "
 freestanding_env['LINKFLAGS'] = "-m elf_i386 -gc-sections -N"
 freestanding_env['LINK'] = "ld"
-freestanding_env['ASFLAGS'] = "-O5 -f elf32"
+freestanding_env['ASFLAGS'] = "-m32"
 
-def CheckCommand(context, cmd):
-       context.Message('Checking for %s command... ' % cmd)
-       result = WhereIs(cmd)
-       context.Result(result is not None)
-       return result
-
-conf = Configure(freestanding_env, custom_tests = {'CheckCommand' : CheckCommand})
-
-if not conf.CheckCommand("yasm"):
-    if not conf.CheckCommand("nasm"):
-        print("Please install yasm or nasm!")
-        Exit(1)
-    else:
-        conf.env['AS'] = "nasm"
-else:
-    conf.env['AS'] = "yasm"
+conf = Configure(freestanding_env)
 
 if not (conf.CheckCHeader("stdint.h") and
         conf.CheckCHeader("stdarg.h")):
@@ -46,7 +31,7 @@ stand = fenv.StaticLibrary('stand',
                              'printf.c',
                              'reboot.c',
                              'serial.c',
-                             'start.asm',
+                             'start.S',
                              'util.c',
                              'version.c',
 
