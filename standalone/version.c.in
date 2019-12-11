@@ -2,6 +2,7 @@
 
 #include <version.h>
 
-const char version_str[] = "Version @VERSION@";
+const char version_str[] = "@VERSION@\n"
+  "Blame Julian Stecklina <julian.stecklina@cyberus-technology.de> for bugs.\n\n";
 
 /* EOF */

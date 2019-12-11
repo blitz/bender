@@ -61,9 +61,7 @@ main(uint32_t magic, struct mbi *mbi)
     return 1;
   }
 
-  printf("\nBender %s\n", version_str);
-  printf("Blame Julian Stecklina <jsteckli@os.inf.tu-dresden.de> for bugs.\n\n");
-
+  printf("\nBender %s", version_str);
   printf("Looking for serial controllers on the PCI bus...\n");
 
   struct pci_device serial_ctrl;

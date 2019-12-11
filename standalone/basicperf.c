@@ -75,9 +75,7 @@ main(uint32_t magic, struct mbi *mbi)
     return 1;
   }
 
-  printf("\nbasicperf %s\n", version_str);
-  printf("Blame Julian Stecklina <jsteckli@os.inf.tu-dresden.de> for bugs.\n\n");
-
+  printf("\nbasicperf %s", version_str);
   printf("Testing \"Basic VM performance\" in %s:\n", __FILE__);
 
   static const unsigned max_stddev = 1000;
