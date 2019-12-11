@@ -45,12 +45,6 @@ t_rdmsr(void)
   asm volatile ("rdmsr" : "=a"(eax), "=d"(edx) : "c"(0xfe)); 
 }
 
-static void
-t_fmmio(void)
-{
-  asm volatile ("fild %0" : "+m" (((volatile float *)0xFEE00000)[1]));
-}
-
 struct test {
   const char *name;
   void (*test_fn)(void);
@@ -63,8 +57,6 @@ static const struct test tests[] = {
   { "portio", t_portio },
   { "mmio  ", t_mmio },
   { "rdmsr ", t_rdmsr },
-  /* Doesn't work. :) */
-  //{ "fmmio ", t_fmmio },
 };
 
 static float sqrtf(float v)

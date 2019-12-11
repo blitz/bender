@@ -1,0 +1,7 @@
+/* -*- Mode: C -*- */
+
+#include <version.h>
+
+const char version_str[] = "Version @VERSION@";
+
+/* EOF */

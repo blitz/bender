@@ -1,11 +1,2 @@
-bin
-tftp
+/build
 *~
-*.o
-*.pyc
-.scons*
-.sconf_temp
-config.log
-*.a
-*.debug
-*.gz
