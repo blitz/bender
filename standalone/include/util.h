@@ -64,7 +64,6 @@ void out_string(const char *value);
 
 void vprintf(const char *fmt, va_list ap);
 void printf(const char *fmt, ...);
-void hexdump(const void *p, unsigned len);
 
 /* Helper functions. */
 void wait(int ms);
