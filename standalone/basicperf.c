@@ -13,12 +13,6 @@ t_empty(void)
 }
 
 static void
-t_vmcall(void)
-{
-  asm volatile ("vmcall" : : "a" (0));
-}
-
-static void
 t_cpuid(void)
 {
   uint32_t eax = 0;
@@ -52,7 +46,6 @@ struct test {
 
 static const struct test tests[] = {
   { "empty ",  t_empty },
-  { "vmcall", t_vmcall },
   { "cpuid ", t_cpuid },
   { "portio", t_portio },
   { "mmio  ", t_mmio },

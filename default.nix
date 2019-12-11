@@ -5,4 +5,3 @@
   buildType ? "Release"
 }:
 pkgs.callPackage ./nix/build.nix { inherit buildType; }
-
