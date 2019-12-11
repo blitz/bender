@@ -3,8 +3,10 @@ project(BENDER C ASM)
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH})
 
-include(GetGitRevisionDescription)
-git_describe(VERSION)
+if (NOT VERSION)
+  include(GetGitRevisionDescription)
+  git_describe(VERSION)
+endif()
 
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
