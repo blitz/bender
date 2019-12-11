@@ -3,7 +3,7 @@
 let gitIgnores = lib.optional (builtins.pathExists ../.gitignore) ../.gitignore;
 in stdenv.mkDerivation rec {
   pname = "morbo";
-  version = "0.9-devel";
+  version = "1.0.0-devel";
 
   src = nix-gitignore.gitignoreSourcePure ([''
     nix
