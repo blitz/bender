@@ -51,3 +51,9 @@ target_link_libraries(bender PRIVATE stand)
 
 add_executable(basicperf basicperf.c)
 target_link_libraries(basicperf PRIVATE stand)
+
+install(
+  TARGETS bender basicperf
+  DESTINATION share/bender
+  PERMISSIONS OWNER_READ
+  )

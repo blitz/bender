@@ -15,9 +15,4 @@ in stdenv.mkDerivation rec {
   nativeBuildInputs = [ cmake ];
   cmakeBuildType = buildType;
   cmakeFlags = "-DVERSION=${version}";
-
-  installPhase = ''
-    mkdir -p $out
-    cp standalone/bender standalone/basicperf $out/
-  '';
 }

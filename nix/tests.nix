@@ -8,7 +8,7 @@ stdenv.mkDerivation {
   nativeBuildInputs = [ expect qemu strace ];
 
   buildPhase = ''
-    expect boot.tcl ${bender}/bender ${bender}/basicperf | tee output.txt
+    expect boot.tcl ${bender}/share/bender/bender ${bender}/share/bender/basicperf | tee output.txt
   '';
 
   installPhase = ''
