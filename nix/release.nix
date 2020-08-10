@@ -13,6 +13,7 @@ rec {
 
     buildInputs = [
       pkgs.ninja
+      pkgs.niv
     ];
 
     hardeningDisable = [ "all" ];
