@@ -63,15 +63,15 @@ serial_init()
 
   /* Programming the first serial adapter (8N1) */
   outb (serial_base + LCR, LCR_DLAB);
-  
+
   /* 115200 baud */
   outb (serial_base + DLR_LOW,  1);
   outb (serial_base + DLR_HIGH, 0);
-    
+
   /* 9600 baud */
   /*   outb (serial_base + DLR_LOW,  0x0C); */
   /*   outb (serial_base + DLR_HIGH, 0); */
-  
+
   outb (serial_base + LCR, LCR_DATA_BITS_8 | LCR_STOP_BITS_1);
   outb (serial_base + IER, 0);
   outb (serial_base + FCR, FCR_FIFO_ENABLE | FCR_RECV_FIFO_RESET | FCR_TMIT_FIFO_RESET);
