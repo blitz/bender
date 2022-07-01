@@ -37,3 +37,24 @@ installed. Afterwards, you can build the source code via:
 ```
 
 You will find `bender` in `standalone/` in your build directory.
+
+# Usage
+
+Check the documentation of your Multiboot-capable boot loader to see
+how Bender is booted. Bender will discover serial ports and then boot
+the next boot module as multiboot kernel.
+
+## Parameters
+
+Bender supports the following command-line parameters:
+
+- `promisc`: Be more forgiving which PCI serial controller to
+  accept. Specifically, this makes Bender claim any PCI device with
+  "Simple Communication Controller" PCI class and not only those
+  claiming to be a legacy serial controller.
+- `accept_legacy`: Don't claim a PCI serial controller, if the BIOS
+  already indicates that there is a legacy serial controller
+  available.
+- `phys_max=256M` (literally only that specific string): Prevent
+  bender from relocating modules past 256M in the physical address
+  space.
