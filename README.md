@@ -20,6 +20,10 @@ Get [Nix](https://nixos.org/nix/) and type:
 
 You can find `bender` in `result/`.
 
+If you have a [Flakes-enabled Nix](https://nixos.wiki/wiki/Flakes),
+try out `nix build` to build bender and `nix flake check` to run its
+tests.
+
 ## Building without Nix
 
 Be sure to have [CMake](https://cmake.org/install/) and a C toolchain

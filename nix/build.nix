@@ -1,13 +1,10 @@
-{ stdenv, cmake, lib, nix-gitignore, buildType }:
+{ stdenv, cmake, lib, buildType ? "Release" }:
 
-let gitIgnores = lib.optional (builtins.pathExists ../.gitignore) ../.gitignore;
-in stdenv.mkDerivation rec {
+stdenv.mkDerivation rec {
   pname = "bender";
   version = "1.0.0-devel";
 
-  src = nix-gitignore.gitignoreSourcePure ([''
-    nix
-  ''] ++ gitIgnores) ./..;
+  src = ./..;
 
   hardeningDisable = [ "all" ];
   enableParallelBuilding = true;
