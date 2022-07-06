@@ -43,6 +43,9 @@
       typeof (b) _b = (b);		  \
       _a > _b ? _b : _a; })
 
+/// Returns the number of elements in an array (not its size in bytes).
+#define ARRAY_SIZE(a) (sizeof(a)/sizeof(a[0]))
+
 char *strtok_r(char *s, const char *delim, char **save_ptr);
 char *strtok(char *s, const char *delim);
 unsigned long long strtoull(const char * __restrict nptr, char ** __restrict endptr, int base);
