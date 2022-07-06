@@ -83,36 +83,6 @@ outl(const uint16_t port, uint32_t value)
   asm volatile("outl %0,%1" :: "a"(value),"Nd"(port));
 }
 
-
-static inline uint32_t
-bsr(uint32_t value)
-{
-  uint32_t res;
-  asm volatile("bsr %1,%0" : "=r"(res): "r"(value));
-  return res;
-}
-
-
-static inline uint32_t
-bsf(uint32_t value)
-{
-  uint32_t res;
-  asm volatile("bsf %1,%0" : "=r"(res): "r"(value));
-  return res;
-}
-
-static inline void
-invlpg(void *p)
-{
-  asm volatile("invlpg %0" :: "m" (*(char *)p));
-}
-
-static inline void
-wbinvd()
-{
-  asm volatile("wbinvd");
-}
-
 static _Noreturn inline void
 cli_halt(void)
 {
