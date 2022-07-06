@@ -51,15 +51,18 @@ serial_send (int c)
 }
 
 void
-serial_init()
+serial_init(void)
 {
-  /* Disable output if there is no serial port. */
-  /* XXX This is disabled, because it is not reliable. */
-  //output_enabled = (serial_ports(get_bios_data_area()) > 0);
-  output_enabled = true;
+  // We could check whether COM1 is actually available via the equipment word in the BIOS Data Area, but this has not
+  // been reliable. So now we just blindly configure the port and hope for the best.
+  serial_init_port(get_bios_data_area()->com_port[0]);
+}
 
-  /* Get our port from the BIOS data area. */
-  serial_base = get_bios_data_area()->com_port[0];
+void
+serial_init_port(uint16_t base_port)
+{
+  output_enabled = true;
+  serial_base = base_port;
 
   /* Programming the first serial adapter (8N1) */
   outb (serial_base + LCR, LCR_DLAB);

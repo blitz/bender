@@ -19,5 +19,13 @@
 
 #pragma once
 
+#include <stdint.h>
+
+/// Initialize COM1 as serial output.
 void serial_init(void);
+
+/// Initialize the serial port at the given base port.
+void serial_init_port(uint16_t base_port);
+
+/// Send a serial character to the serial port configured with one of the serial_init functions above.
 void serial_send(int c);
