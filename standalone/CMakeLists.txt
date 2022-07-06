@@ -52,6 +52,9 @@ target_link_libraries(bender PRIVATE stand)
 add_executable(basicperf basicperf.c)
 target_link_libraries(basicperf PRIVATE stand)
 
+add_executable(amy amy.c)
+target_link_libraries(amy PRIVATE stand)
+
 install(
   TARGETS bender basicperf
   DESTINATION share/bender
