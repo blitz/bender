@@ -93,21 +93,6 @@ pci_find_device_by_class(uint8_t class, uint8_t subclass,
   }
 }
 
-unsigned char
-pci_find_cap(unsigned addr, unsigned char id)
-{
-  if (~pci_read_uint32(addr+PCI_CONF_HDR_CMD) & 0x100000)
-    return 0;
-  unsigned char cap_offset = pci_read_uint8(addr+PCI_CONF_HDR_CAP);
-  while (cap_offset)
-    if (id == pci_read_uint8(addr+cap_offset))
-      return cap_offset;
-    else
-      cap_offset = pci_read_uint8(addr+cap_offset+PCI_CAP_OFFSET);
-  return 0;
-}
-
-
 uint32_t
 pci_cfg_read_uint32(const struct pci_device *dev, uint32_t offset)
 {
