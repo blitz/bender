@@ -81,4 +81,10 @@ serial_init_port(uint16_t base_port)
   outb (serial_base + MCR, MCR_DTR | MCR_RTS);
 }
 
+void
+serial_disable(void)
+{
+  output_enabled = false;
+}
+
 /* EOF */

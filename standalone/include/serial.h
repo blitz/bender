@@ -29,3 +29,6 @@ void serial_init_port(uint16_t base_port);
 
 /// Send a serial character to the serial port configured with one of the serial_init functions above.
 void serial_send(int c);
+
+/// Disable serial output.
+void serial_disable(void);
