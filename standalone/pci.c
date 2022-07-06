@@ -46,8 +46,61 @@ populate_device_info(uint32_t cfg_address, struct pci_device *dev)
 
   dev->db = pci_lookup_device(vendor_id, device_id);
   dev->cfg_address = cfg_address;
+  dev->vendor_id = vendor_id;
+  dev->device_id = device_id;
 }
 
+static void
+pci_iter_advance(struct pci_iter *iter)
+{
+  assert(iter->function <= iter->max_function, "Function index out of range");
+
+  if (iter->function == iter->max_function) {
+    iter->function = 0;
+    iter->max_function = 0;
+    iter->bus_device += 1;
+  } else {
+    iter->function += 1;
+  }
+}
+
+bool
+pci_iter_next_device(struct pci_iter *iter, struct pci_device *dev)
+{
+  while (iter->bus_device < (1 << 13)) {
+
+    uint32_t addr = 0x80000000 | iter->bus_device << 11 | iter->function<<8;
+
+    if (pci_read_uint32(addr + PCI_CFG_VENDOR_ID) == 0xFFFFFFFF) {
+      pci_iter_advance(iter);
+      continue;
+    }
+
+    /* Is it a multifunction device? If so, we need to probe its functions. */
+    if (!iter->max_function && pci_read_uint8(addr + 14) & 0x80) {
+      iter->max_function = 7;
+    }
+
+    populate_device_info(addr, dev);
+    pci_iter_advance(iter);
+    return true;
+  }
+
+  return false;
+}
+
+bool
+pci_iter_next_matching(struct pci_iter *iter, bool(*predicate)(struct pci_device *),
+                            struct pci_device *dev)
+{
+  while (pci_iter_next_device(iter, dev)) {
+    if (predicate(dev)) {
+      return true;
+    }
+  }
+
+  return false;
+}
 
 bool
 pci_find_device_by_class(uint8_t class, uint8_t subclass,
@@ -85,6 +138,15 @@ uint32_t pci_cfg_read_bar(struct pci_device *dev, unsigned bar_no)
 {
   assert(bar_no < PCI_BAR_NUM, "Invalid BAR number");
   return pci_cfg_read_uint32(dev, PCI_CFG_BAR0 + 4*bar_no);
+}
+
+bool pci_matches_class(struct pci_device *dev, uint8_t class, uint8_t subclass)
+{
+  uint16_t full_class = class << 8 | subclass;
+  uint16_t class_mask = (subclass == PCI_SUBCLASS_ANY) ? 0xFF00 : 0xFFFF;
+
+  return (full_class & class_mask)
+    == ((pci_read_uint32(dev->cfg_address + PCI_CFG_REVID) >> 16) & class_mask);
 }
 
 /* EOF */

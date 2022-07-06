@@ -69,7 +69,30 @@ enum pci_constants {
 struct pci_device {
   const struct pci_db_entry *db;
   uint32_t cfg_address;		/* Address of config space */
+
+  uint16_t vendor_id;
+  uint16_t device_id;
 };
+
+/// An iterator over PCI devices.
+///
+/// To use this, initialize it with PCI_ITER_INIT.
+struct pci_iter {
+  unsigned bus_device;
+  uint8_t function;
+  uint8_t max_function;
+};
+
+#define PCI_ITER_INIT { .bus_device = 0, .function = 0, .function = 0 }
+
+/// Iterate to the next PCI device.
+///
+/// Returns true, if a device was found. In this case, *dev will be filled with device info.
+bool pci_iter_next_device(struct pci_iter *iter, struct pci_device *dev);
+
+/// Similar to pci_iter_next_device, but finds the next device that matches a predicate.
+bool pci_iter_next_matching(struct pci_iter *iter, bool(*predicate)(struct pci_device *),
+                            struct pci_device *dev);
 
 /* Find a device by its class. Always finds the last device of the
    given class. On success, returns true and fills out the given
@@ -80,5 +103,8 @@ bool pci_find_device_by_class(uint8_t class, uint8_t subclass,
 
 /* Read the value of the given BAR. */
 uint32_t pci_cfg_read_bar(struct pci_device *dev, unsigned bar_no);
+
+/* Check whether a device matches a specific device class. */
+bool pci_matches_class(struct pci_device *dev, uint8_t class, uint8_t subclass);
 
 /* EOF */
