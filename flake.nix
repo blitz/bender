@@ -18,9 +18,9 @@
         bender-debug = bender.override {
           buildType = "Debug";
         };
-      };
 
-      defaultPackage.x86_64-linux = self.packages.x86_64-linux.bender;
+        default = bender;
+      };
 
       checks.x86_64-linux = {
         bender-tests = nixpkgs.legacyPackages.x86_64-linux.callPackage ./nix/tests.nix {
