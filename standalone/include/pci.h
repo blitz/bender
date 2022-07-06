@@ -101,10 +101,12 @@ bool pci_iter_next_matching(struct pci_iter *iter, bool(*predicate)(struct pci_d
 bool pci_find_device_by_class(uint8_t class, uint8_t subclass,
 			      struct pci_device *dev);
 
-/* Read the value of the given BAR. */
-uint32_t pci_cfg_read_bar(struct pci_device *dev, unsigned bar_no);
-
 /* Check whether a device matches a specific device class. */
 bool pci_matches_class(struct pci_device *dev, uint8_t class, uint8_t subclass);
+
+/// Find the I/O port of the first PIO BAR.
+///
+/// Returns true, if a PIO BAR is found. In this case, *iobase contains the port number.
+bool pci_first_iobar_base(struct pci_device *dev, uint16_t *iobase);
 
 /* EOF */

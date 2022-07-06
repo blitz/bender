@@ -96,12 +96,11 @@ main(uint32_t magic, struct mbi *mbi)
   }
 
   uint16_t iobase = 0;
-  for (size_t bar_no = 0; bar_no < PCI_BAR_NUM; bar_no++) {
-    uint32_t bar = pci_cfg_read_bar(&serial_ctrl, bar_no);
-    if ((bar & PCI_BAR_TYPE_MASK) == PCI_BAR_TYPE_IO) {
-      iobase = bar & PCI_BAR_IO_MASK;
-      break;
-    }
+  bool has_iobar = pci_first_iobar_base(&serial_ctrl, &iobase);
+
+  if (!has_iobar) {
+    printf("Controller has no PIO BAR.\n");
+    goto boot_next;
   }
 
   iobase = apply_quirks(&serial_ctrl, iobase);

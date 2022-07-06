@@ -134,10 +134,26 @@ pci_find_device_by_class(uint8_t class, uint8_t subclass,
   }
 }
 
-uint32_t pci_cfg_read_bar(struct pci_device *dev, unsigned bar_no)
+static uint32_t
+pci_cfg_read_bar(struct pci_device *dev, unsigned bar_no)
 {
   assert(bar_no < PCI_BAR_NUM, "Invalid BAR number");
   return pci_cfg_read_uint32(dev, PCI_CFG_BAR0 + 4*bar_no);
+}
+
+bool
+pci_first_iobar_base(struct pci_device *dev, uint16_t *iobase)
+{
+  for (size_t bar_no = 0; bar_no < PCI_BAR_NUM; bar_no++) {
+    uint32_t bar = pci_cfg_read_bar(dev, bar_no);
+
+    if ((bar & PCI_BAR_TYPE_MASK) == PCI_BAR_TYPE_IO) {
+      *iobase = bar & PCI_BAR_IO_MASK;
+      return true;
+    }
+  }
+
+  return false;
 }
 
 bool pci_matches_class(struct pci_device *dev, uint8_t class, uint8_t subclass)
