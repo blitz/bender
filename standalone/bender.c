@@ -60,6 +60,18 @@ static uint16_t apply_quirks(struct pci_device *pcid, uint16_t raw_iobase)
   return iobase;
 }
 
+static bool
+is_serial_controller(struct pci_device *dev)
+{
+  return pci_matches_class(dev, PCI_CLASS_SIMPLE_COMM, PCI_SUBCLASS_SERIAL_CTRL);
+}
+
+static bool
+is_simple_comm(struct pci_device *dev)
+{
+  return pci_matches_class(dev, PCI_CLASS_SIMPLE_COMM, PCI_SUBCLASS_ANY);
+}
+
 int
 main(uint32_t magic, struct mbi *mbi)
 {
@@ -84,11 +96,19 @@ main(uint32_t magic, struct mbi *mbi)
     goto boot_next;
   }
 
+  /* Try to find the last matching controller. */
+  bool found_ctrl = false;
+  bool found_matching_ctrl = false;
+  struct pci_iter iter = PCI_ITER_INIT;
+  struct pci_device dev;
   struct pci_device serial_ctrl;
 
-  if (pci_find_device_by_class(PCI_CLASS_SIMPLE_COMM,
-			       be_promisc ? PCI_SUBCLASS_ANY : PCI_SUBCLASS_SERIAL_CTRL,
-			       &serial_ctrl)) {
+  while ((found_ctrl = pci_iter_next_matching(&iter, be_promisc ? is_simple_comm : is_serial_controller, &dev))) {
+    found_matching_ctrl = true;
+    memcpy(&serial_ctrl, &dev, sizeof(serial_ctrl));
+  }
+
+  if (found_matching_ctrl) {
     printf("  found at %x.\n", serial_ctrl.cfg_address);
   } else {
     printf("  none found.\n");

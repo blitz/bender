@@ -94,13 +94,6 @@ bool pci_iter_next_device(struct pci_iter *iter, struct pci_device *dev);
 bool pci_iter_next_matching(struct pci_iter *iter, bool(*predicate)(struct pci_device *),
                             struct pci_device *dev);
 
-/* Find a device by its class. Always finds the last device of the
-   given class. On success, returns true and fills out the given
-   pci_device structure. If subclass is 0xFF, it will be
-   ignored. Otherwise, returns false. */
-bool pci_find_device_by_class(uint8_t class, uint8_t subclass,
-			      struct pci_device *dev);
-
 /* Check whether a device matches a specific device class. */
 bool pci_matches_class(struct pci_device *dev, uint8_t class, uint8_t subclass);
 
