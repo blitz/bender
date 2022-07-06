@@ -21,7 +21,7 @@ static bool accept_legacy = false;
 /* Upper limit of where we are willing to relocate modules. */
 static uint64_t phys_max_relocate = 1ULL << 31; /* below 2G */
 
-void
+static void
 parse_cmdline(const char *cmdline)
 {
   char *last_ptr = NULL;
