@@ -17,39 +17,27 @@
 #include <util.h>
 #include <pci.h>
 
-/**
- * Read a byte from the pci config space.
- */
-uint8_t
+static uint8_t
 pci_read_uint8(unsigned addr)
 {
   outl(PCI_ADDR_PORT, addr);
   return inb(PCI_DATA_PORT + (addr & 3));
 }
 
-/**
- * Read a long from the pci config space.
- */
-uint32_t
+static uint32_t
 pci_read_uint32(unsigned addr)
 {
   outl(PCI_ADDR_PORT, addr);
   return inl(PCI_DATA_PORT);
 }
 
-/**
- * Write a long to the pci config space.
- */
-void
-pci_write_uint32(unsigned addr, uint32_t value)
+static uint32_t
+pci_cfg_read_uint32(const struct pci_device *dev, uint32_t offset)
 {
-  outl(PCI_ADDR_PORT, addr);
-  outl(PCI_DATA_PORT, value);
+  return pci_read_uint32(dev->cfg_address + offset);
 }
 
-
-/* Fillout pci_device structure. */
-void
+static void
 populate_device_info(uint32_t cfg_address, struct pci_device *dev)
 {
   uint32_t vendor_id = pci_read_uint32(cfg_address + PCI_CFG_VENDOR_ID);
@@ -93,10 +81,10 @@ pci_find_device_by_class(uint8_t class, uint8_t subclass,
   }
 }
 
-uint32_t
-pci_cfg_read_uint32(const struct pci_device *dev, uint32_t offset)
+uint32_t pci_cfg_read_bar(struct pci_device *dev, unsigned bar_no)
 {
-  return pci_read_uint32(dev->cfg_address + offset);
+  assert(bar_no < PCI_BAR_NUM, "Invalid BAR number");
+  return pci_cfg_read_uint32(dev, PCI_CFG_BAR0 + 4*bar_no);
 }
 
 /* EOF */

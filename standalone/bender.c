@@ -96,8 +96,8 @@ main(uint32_t magic, struct mbi *mbi)
   }
 
   uint16_t iobase = 0;
-  for (unsigned bar_no = 0; bar_no < 6; bar_no++) {
-    uint32_t bar = pci_cfg_read_uint32(&serial_ctrl, PCI_CFG_BAR0 + 4*bar_no);
+  for (size_t bar_no = 0; bar_no < PCI_BAR_NUM; bar_no++) {
+    uint32_t bar = pci_cfg_read_bar(&serial_ctrl, bar_no);
     if ((bar & PCI_BAR_TYPE_MASK) == PCI_BAR_TYPE_IO) {
       iobase = bar & PCI_BAR_IO_MASK;
       break;

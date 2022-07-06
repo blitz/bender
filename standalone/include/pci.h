@@ -62,6 +62,8 @@ enum pci_constants {
   PCI_BAR_TYPE_MASK = 1U,
   PCI_BAR_TYPE_IO   = 1U,
   PCI_BAR_IO_MASK   = ~1U,
+
+  PCI_BAR_NUM = 6,
 };
 
 struct pci_device {
@@ -69,18 +71,14 @@ struct pci_device {
   uint32_t cfg_address;		/* Address of config space */
 };
 
-/* Low-Level PCI Access */
-uint8_t pci_read_uint8(unsigned addr);
-uint32_t pci_read_uint32(unsigned addr);
-
-
-uint32_t pci_cfg_read_uint32(const struct pci_device *dev, uint32_t offset);
-
 /* Find a device by its class. Always finds the last device of the
    given class. On success, returns true and fills out the given
    pci_device structure. If subclass is 0xFF, it will be
    ignored. Otherwise, returns false. */
 bool pci_find_device_by_class(uint8_t class, uint8_t subclass,
 			      struct pci_device *dev);
+
+/* Read the value of the given BAR. */
+uint32_t pci_cfg_read_bar(struct pci_device *dev, unsigned bar_no);
 
 /* EOF */
