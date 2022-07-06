@@ -46,7 +46,7 @@ wait(int ms)
 /**
  * Print the exit status and reboot the machine.
  */
-void __attribute__((regparm(1), noreturn))
+_Noreturn void __attribute__((regparm(1)))
 __exit(unsigned status)
 {
   const unsigned delay = 300;

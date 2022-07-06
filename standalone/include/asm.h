@@ -21,7 +21,7 @@
 
 #include <stdint.h>
 
-void jmp_multiboot(const void * mbi, uint32_t entry) __attribute__((noreturn)) __attribute__((regparm(2)));
+_Noreturn void jmp_multiboot(const void * mbi, uint32_t entry) __attribute__((regparm(2)));
 
 static inline uint32_t
 ntohl(uint32_t v)
@@ -113,10 +113,12 @@ wbinvd()
   asm volatile("wbinvd");
 }
 
-static inline void
+static _Noreturn inline void
 cli_halt(void)
 {
-  asm volatile("cli ; hlt");
+  while (1) {
+    asm volatile("cli ; hlt");
+  }
 }
 
 static inline void

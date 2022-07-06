@@ -67,8 +67,8 @@ void printf(const char *fmt, ...);
 
 /* Helper functions. */
 void wait(int ms);
-void __exit(unsigned status) __attribute__((regparm(1), noreturn));
-void reboot(void) __attribute__((noreturn));
+_Noreturn void __exit(unsigned status) __attribute__((regparm(1)));
+_Noreturn void reboot(void);
 
 /* Boot info */
 extern struct mbi *multiboot_info;
