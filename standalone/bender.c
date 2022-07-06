@@ -51,14 +51,13 @@ parse_cmdline(const char *cmdline)
 
 static uint16_t apply_quirks(struct pci_device *pcid, uint16_t raw_iobase)
 {
-    uint32_t vendormodel = pci_cfg_read_uint32(pcid, 0);
+  uint16_t iobase = raw_iobase;
+  if (pcid->db->quirks & QUIRK_SERIAL_BAR0_OFFSET_C0) {
+    printf("Found XR16850 chip. Adding 0xc0 to iobase offset.\n");
+    iobase += 0xc0;
+  }
 
-    if (vendormodel == 0x32531c00) {
-        printf("Found XR16850 chip. Adding 0xc0 to iobase offset.\n");
-        return raw_iobase + 0xc0;
-    }
-
-    return raw_iobase;
+  return iobase;
 }
 
 int

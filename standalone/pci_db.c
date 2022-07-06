@@ -7,15 +7,8 @@
 /* This list is searched from top to bottom. Wildcards always
    match. */
 static const struct pci_db_entry vendor_db[] = {
-  /* Texas Instruments */
-  { 0x104c,   0x8023,   NO_QUIRKS, "Texas Instruments IEEE1394a-2000 OHCI PHY/Link-Layer Ctrlr" },
-  { 0x104c,   0x8235,   NO_QUIRKS, "Texas Instruments XIO2200(A) IEEE-1394a-2000 Controller (PHY/Link)" },
-  { 0x104c,   WILDCARD, NO_QUIRKS, "Texas Instruments Unknown Device" },
-  /* NEC */
-  { 0x1033,   0x00e7,   NO_QUIRKS, "NEC Electronics IEEE1394 OHCI 1.1 2-port PHY-Link Ctrlr" },
-  { 0x1033,   WILDCARD, NO_QUIRKS, "NEC Electronics Unknown Device" },
-  /* JMicron */
-  { 0x197b,   0x2380,   NO_QUIRKS, "JMicron Technology Corp. IEEE 1394 Host Controller"},
+  { 0x1c00, 0x3253, QUIRK_SERIAL_BAR0_OFFSET_C0, " WCH CH353 Serial Controller"},
+
   /* Unknown (don't remove this item) */
   { WILDCARD, WILDCARD, NO_QUIRKS, "Unknown Device" }
 };
