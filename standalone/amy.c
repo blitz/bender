@@ -6,6 +6,7 @@
 #include <version.h>
 #include <serial.h>
 #include <bda.h>
+#include <pci.h>
 
 static void
 parse_cmdline(const char *cmdline)
@@ -36,6 +37,47 @@ probe_legacy(void)
   }
 }
 
+static bool
+is_serial_controller(struct pci_device *dev)
+{
+  return pci_matches_class(dev, PCI_CLASS_SIMPLE_COMM, PCI_SUBCLASS_SERIAL_CTRL);
+}
+
+static uint16_t apply_quirks(struct pci_device *pcid, uint16_t raw_iobase)
+{
+  uint16_t iobase = raw_iobase;
+  if (pcid->db->quirks & QUIRK_SERIAL_BAR0_OFFSET_C0) {
+    printf("Found XR16850 chip. Adding 0xc0 to iobase offset.\n");
+    iobase += 0xc0;
+  }
+
+  return iobase;
+}
+
+static void
+probe_pci(void)
+{
+  struct pci_iter iter = PCI_ITER_INIT;
+  struct pci_device dev;
+
+  while (pci_iter_next_matching(&iter, is_serial_controller, &dev)) {
+    printf("Found Serial Controller: %lx\n", dev.cfg_address);
+
+    uint16_t iobase = 0;
+
+    if (!pci_first_iobar_base(&dev, &iobase)) {
+      printf("No PIO BAR. Skipping.\n");
+      continue;
+    }
+
+    iobase = apply_quirks(&dev, iobase);
+
+    serial_init_port(iobase);
+    printf("Probing PCI serial controller %lx at port %x...\n", dev.cfg_address, iobase);
+    serial_disable();
+  }
+}
+
 int
 main(uint32_t magic, struct mbi *mbi)
 {
@@ -48,9 +90,12 @@ main(uint32_t magic, struct mbi *mbi)
   }
 
   printf("\nAmy %s", version_str);
-  printf("Probing for serial controllers...\n");
 
+  printf("Probing for legacy serial controllers...\n");
   probe_legacy();
+
+  printf("Probing for PCI serial controllers...\n");
+  probe_pci();
 
   printf("Our job is done. Sleeping.\n");
   cli_halt();
