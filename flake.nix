@@ -1,5 +1,5 @@
 {
-  description = "A very basic flake";
+  description = "Bender the serial port bender";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-22.05";
@@ -13,6 +13,8 @@
     let
       bender = nixpkgs.legacyPackages.x86_64-linux.callPackage ./nix/build.nix {};
     in {
+      overlays.default = import ./nix/overlay.nix;
+
       packages.x86_64-linux = {
         inherit bender;
         bender-debug = bender.override {
