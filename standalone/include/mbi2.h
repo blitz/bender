@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include <stddef.h>
 #include <stdint.h>
 
 enum mbi2_enum
@@ -36,18 +37,27 @@ enum mbi2_enum
     MBI2_TAG_EFI_IMAGE_64 = 20,
   };
 
+struct mbi2_boot_info
+{
+  uint32_t total_size;
+  uint32_t reserved;
+};
+_Static_assert(sizeof(struct mbi2_boot_info) == 8);
+
 struct mbi2_tag
 {
   uint32_t type;
   uint32_t size;
-} __attribute__((packed));
+};
+_Static_assert(sizeof(struct mbi2_tag) == 8);
 
 struct mbi2_module
 {
   uint32_t mod_start;
   uint32_t mod_end;
   char     string[];
-} __attribute__((packed));
+};
+_Static_assert(sizeof(struct mbi2_module) == 8);
 
 struct mbi2_memory
 {
@@ -55,35 +65,21 @@ struct mbi2_memory
   uint64_t len;
   uint32_t type;
   uint32_t reserved;
-} __attribute__((packed));
-
-struct mbi2_fb {
-  uint64_t addr;
-  uint32_t pitch;
-  uint32_t width;
-  uint32_t height;
-  uint8_t  bpp;
-  uint8_t  type;
-} __attribute__((packed));
+};
+_Static_assert(sizeof(struct mbi2_memory) == 24);
 
 static inline
-struct mbi2_tag * mbi2_first(void *multiboot)
+struct mbi2_tag * mbi2_tag_first(struct mbi2_boot_info *mbi)
 {
-  struct mbi2_tag * header = (struct mbi2_tag *)multiboot;
-  return header + 1;
+  return (struct mbi2_tag *)((char *)mbi + sizeof(*mbi));
 }
 
 static inline
-struct mbi2_tag * mbi2_next(struct mbi2_tag *c)
+struct mbi2_tag * mbi2_tag_next(struct mbi2_tag *c)
 {
-  uint32_t offset = (c->size + (sizeof(*c) - 1)) & ~(sizeof(*c) - 1);
-  struct mbi2_tag * n = (struct mbi2_tag *)((unsigned long)c + offset);
+  size_t offset = (c->size + (sizeof(*c) - 1)) & ~(sizeof(*c) - 1);
+  struct mbi2_tag * n = (struct mbi2_tag *)((char *)c + offset);
   return (n->type == 0) ? 0 : n;
 }
 
-static inline
-uint32_t mbi2_size(void *multiboot)
-{
-  return *(uint32_t *)multiboot;
-}
 /* EOF */
