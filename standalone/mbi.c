@@ -51,11 +51,11 @@ mbi_find_memory(const struct mbi *multiboot_info, size_t len,
 
       if (!highest) return true;
     }
-  
+
     /* Skip to next entry. */
     mmap = (memory_map_t *)(mmap->size + (uint32_t)mmap + sizeof(mmap->size));
   }
-  
+
   return found;
 }
 
@@ -67,19 +67,19 @@ mbi_alloc_protected_memory(struct mbi *multiboot_info, size_t len, unsigned alig
   uint32_t align_mask = ~((1<<align)-1);
   size_t mmap_len    = multiboot_info->mmap_length;
   memory_map_t *mmap = (memory_map_t *)multiboot_info->mmap_addr;
-  
+
   while ((uint32_t)mmap < multiboot_info->mmap_addr + mmap_len) {
     uint64_t block_len  = (uint64_t)mmap->length_high<<32 | mmap->length_low;
     uint64_t block_addr = (uint64_t)mmap->base_addr_high<<32 | mmap->base_addr_low;
 
     if ((mmap->type == MMAP_AVAILABLE) && (block_len >= len) &&
-	(((block_addr + block_len) >> 32) == 0ULL /* Block below 4GB? */) &&
-	/* Still large enough with alignment? Don't use the block if
-	   it fits exactly, otherwise we would have to remove it. */
-	(((block_addr + block_len - len) & align_mask) > block_addr)) {
+        (((block_addr + block_len) >> 32) == 0ULL /* Block below 4GB? */) &&
+        /* Still large enough with alignment? Don't use the block if
+           it fits exactly, otherwise we would have to remove it. */
+        (((block_addr + block_len - len) & align_mask) > block_addr)) {
 
       uint32_t aligned_len = block_addr + block_len - ((block_addr + block_len - len) & align_mask);
-      
+
       /* Shorten block. */
       block_len -= aligned_len;
       mmap->length_high = block_len >> 32;
@@ -87,7 +87,7 @@ mbi_alloc_protected_memory(struct mbi *multiboot_info, size_t len, unsigned alig
 
       return (void *)(uint32_t)(block_addr + block_len);
     }
-  
+
     /* Skip to next entry. */
     mmap = (memory_map_t *)(mmap->size + (uint32_t)mmap + sizeof(mmap->size));
   }
@@ -106,7 +106,7 @@ gzip_info(struct module *mod, size_t *uncompressed)
   int ret = tinf_gzip_uncompress(NULL, uncompressed,
                                  (void *)mod->mod_start,
                                  mod->mod_end - mod->mod_start);
-  return (ret == TINF_OK);    
+  return (ret == TINF_OK);
 }
 
 /**
@@ -125,7 +125,7 @@ mbi_relocate_modules(struct mbi *mbi, bool uncompress, uint64_t phys_max)
     tinf_init();
 
   struct module *mods = (struct module *)mbi->mods_addr;
-  struct { 
+  struct {
     size_t modlen;
     size_t slen;
     size_t inflated_size;
@@ -173,7 +173,7 @@ mbi_relocate_modules(struct mbi *mbi, bool uncompress, uint64_t phys_max)
     for (int i = mbi->mods_count - 1; i >= 0; i--) {
       size_t target_len = minfo[i].do_inflate ? minfo[i].inflated_size : minfo[i].modlen;
       block_len -= (minfo[i].slen + target_len + 0xFFF) & ~0xFFF;
-    
+
       if (minfo[i].do_inflate) {
         size_t uncompressed;
         printf("Inflating %u -> %u bytes...\n", minfo[i].modlen, target_len);
@@ -189,7 +189,7 @@ mbi_relocate_modules(struct mbi *mbi, bool uncompress, uint64_t phys_max)
       mods[i].mod_start = (size_t)((char *)block + block_len);
       mods[i].mod_end = mods[i].mod_start + target_len;
 
-      memcpy((char *)block + block_len + target_len, 
+      memcpy((char *)block + block_len + target_len,
              (void *)mods[i].string, minfo[i].slen);
       mods[i].string = (uintptr_t)((char *)block + block_len + target_len);
     }
