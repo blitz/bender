@@ -138,7 +138,8 @@ main(uint32_t magic, struct mbi *mbi)
   if (serial_ports(get_bios_data_area()))
     serial_init();
 
-  printf("Bender: Hello World.\n");
+  /* Print version again, because usually no one is looking at VGA. */
+  printf("\nBender %s", version_str);
 
   return start_module(mbi, phys_max_relocate);
 }

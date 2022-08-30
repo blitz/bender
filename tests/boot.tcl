@@ -17,7 +17,7 @@ expect {
     timeout abort
     eof     abort
 
-    "Bender: Hello World"
+    "Bender "
 }
 
 expect {
