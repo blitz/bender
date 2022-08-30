@@ -6,7 +6,7 @@
 
 /** Find a sufficiently large block of free memory that is page aligned.
  */
-bool
+static bool
 mbi_find_memory(const struct mbi *multiboot_info, size_t len,
                 void **block_start_out, size_t *block_len_out,
                 bool highest, uint64_t const limit_to)
