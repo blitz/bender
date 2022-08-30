@@ -127,5 +127,25 @@ mbi_relocate_modules(struct mbi *mbi, uint64_t phys_max)
   }
 }
 
+/**
+ * Pop one module off the Multiboot1 info.
+ *
+ * Returns the physical address of the module we removed from the module list.
+ */
+uint64_t
+mbi_pop_module(struct mbi *mbi)
+{
+  assert(mbi->mods_count > 0, "No module to start?");
+
+  struct module *m  = (struct module *) mbi->mods_addr;
+  mbi->mods_addr += sizeof(struct module);
+  mbi->mods_count--;
+  mbi->cmdline = m->string;
+
+  // Switch on the command line, because we assume that m->string above is always initialized.
+  mbi->flags |= MBI_FLAG_CMDLINE;
+
+  return m->mod_start;
+}
 
 /* EOF */

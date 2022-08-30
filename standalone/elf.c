@@ -67,19 +67,13 @@ start_module(struct mbi *mbi, uint64_t phys_max)
 
   mbi_relocate_modules(mbi, phys_max);
 
-  // skip module after loading
-  struct module *m  = (struct module *) mbi->mods_addr;
-  mbi->mods_addr += sizeof(struct module);
-  mbi->mods_count--;
-  mbi->cmdline = m->string;
+  uint64_t mod_start = mbi_pop_module(mbi);
+  assert((uintptr_t)mod_start == mod_start, "Module is beyond what we can access");
 
-  // switch it on unconditionally, we assume that m->string is always initialized
-  mbi->flags |=  MBI_FLAG_CMDLINE;
-
-  // check elf header
-  struct eh *elf = (struct eh *) m->mod_start;
+  struct eh *elf = (struct eh *)(uintptr_t)mod_start;
   assert(memcmp(elf->e_ident, ELFMAG, SELFMAG) == 0, "ELF header incorrect");
 
+  // We assume that memory is available at the location where the BIOS would usually execute boot blocks.
   uint8_t *code = (uint8_t *)0x7C00;
 
 #define LOADER(EH, PH) {                                                \
@@ -88,10 +82,10 @@ start_module(struct mbi *mbi, uint64_t phys_max)
     assert(sizeof(struct PH) <= elfc->e_phentsize, "e_phentsize too small"); \
                                                                         \
     for (unsigned i = 0; i < elfc->e_phnum; i++) {                      \
-      struct PH *ph = (struct PH *)(uintptr_t)(m->mod_start + elfc->e_phoff+ i*elfc->e_phentsize); \
+      struct PH *ph = (struct PH *)(uintptr_t)(mod_start + elfc->e_phoff+ i*elfc->e_phentsize); \
       if (ph->p_type != 1)                                              \
         continue;                                                       \
-      gen_elf_segment(&code, ph->p_paddr, (void *)(uintptr_t)(m->mod_start+ph->p_offset), ph->p_filesz, \
+      gen_elf_segment(&code, ph->p_paddr, (void *)(uintptr_t)(mod_start+ph->p_offset), ph->p_filesz, \
                       ph->p_memsz - ph->p_filesz);                      \
     }                                                                   \
                                                                         \
