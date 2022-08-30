@@ -59,11 +59,13 @@ mbi_find_memory(const struct mbi *multiboot_info, size_t len,
 
 /**
  * Push all modules to the highest available location in memory below phys_max.
+ *
+ * With extra_space additional memory behind the modules can be requested. The
  */
-void
-mbi_relocate_modules(struct mbi *mbi, uint64_t phys_max)
+uint64_t
+mbi_relocate_modules(struct mbi *mbi, uint64_t phys_max, size_t extra_space)
 {
-  size_t size = 0;
+  size_t size = extra_space;
 
   struct module *mods = (struct module *)mbi->mods_addr;
   struct {
@@ -93,11 +95,11 @@ mbi_relocate_modules(struct mbi *mbi, uint64_t phys_max)
       if (mods[i].mod_end > reladdr) {
         if (reladdr == mods[i].mod_start) {
           printf("Modules seem to be relocated. Good.\n");
-          return;
+          return (uint64_t)(uintptr_t)block;
         } else {
           printf("Modules might overlap.\nRelocate to %p, but module at %8x-%8x.\n",
                  reladdr, mods[i].mod_start, mods[i].mod_end-1);
-          return;
+          assert(false, "Failed to relocate");
         }
       }
     }
@@ -124,7 +126,16 @@ mbi_relocate_modules(struct mbi *mbi, uint64_t phys_max)
 
   } else {
     printf("Cannot relocate. Trying without...\n");
+
+    if (!mbi_find_memory(mbi, extra_space, &block, &block_len, true, phys_max)) {
+      assert(false, "Cannot find space for extra_space");
+    }
   }
+
+  assert(block_len >= extra_space, "We are left with less space than we should?");
+
+  /* We copy modules from the end of our allocated region. The front of the block is thus the free extra_space. */
+  return (uint64_t)(uintptr_t)block;
 }
 
 /**

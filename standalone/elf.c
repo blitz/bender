@@ -65,7 +65,7 @@ start_module(struct mbi *mbi, uint64_t phys_max)
     return -1;
   }
 
-  mbi_relocate_modules(mbi, phys_max);
+  mbi_relocate_modules(mbi, phys_max, 0);
 
   uint64_t mod_start = mbi_pop_module(mbi);
   assert((uintptr_t)mod_start == mod_start, "Module is beyond what we can access");
