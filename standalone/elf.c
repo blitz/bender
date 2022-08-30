@@ -95,7 +95,6 @@ start_module(struct mbi *mbi, uint64_t phys_max)
                       ph->p_memsz - ph->p_filesz);                      \
     }                                                                   \
                                                                         \
-    gen_mov(&code, EAX, 0x2BADB002);                                    \
     gen_mov(&code, EDX, elfc->e_entry);                                 \
   }
 
@@ -110,6 +109,7 @@ start_module(struct mbi *mbi, uint64_t phys_max)
     assert(false, "Invalid ELF class");
   }
 
+  gen_mov(&code, EAX, 0x2BADB002);
   gen_jmp_edx(&code);
   asm volatile  ("jmp *%%edx" :: "a" (0), "d" (0x7C00), "b" (mbi));
 
