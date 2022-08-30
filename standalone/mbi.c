@@ -12,14 +12,16 @@ mbi_find_memory(const struct mbi *multiboot_info, size_t len,
                 bool highest, uint64_t const limit_to)
 {
   bool found         = false;
-  size_t mmap_len    = multiboot_info->mmap_length;
-  memory_map_t *mmap = (memory_map_t *)multiboot_info->mmap_addr;
+  uint32_t mmap_end  = multiboot_info->mmap_addr + multiboot_info->mmap_length;
 
   /* be paranoid */
   if (limit_to <= len)
     return false;
 
-  while ((uint32_t)mmap < multiboot_info->mmap_addr + mmap_len) {
+  for (memory_map_t *mmap = (memory_map_t *)multiboot_info->mmap_addr;
+       mmap != NULL;
+       mmap = mbi_memory_map_next(mmap, mmap_end)) {
+
     uint64_t block_len  = (uint64_t)mmap->length_high<<32 | mmap->length_low;
     uint64_t block_addr = (uint64_t)mmap->base_addr_high<<32 | mmap->base_addr_low;
 
@@ -49,9 +51,6 @@ mbi_find_memory(const struct mbi *multiboot_info, size_t len,
 
       if (!highest) return true;
     }
-
-    /* Skip to next entry. */
-    mmap = (memory_map_t *)(mmap->size + (uint32_t)mmap + sizeof(mmap->size));
   }
 
   return found;

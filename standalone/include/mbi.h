@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include <stddef.h>
 #include <stdint.h>
 
 enum mbi_enum
@@ -66,6 +67,13 @@ typedef struct memory_map
   uint32_t length_high;
   uint32_t type;
 } memory_map_t;
+
+
+static inline memory_map_t *mbi_memory_map_next(memory_map_t *mmap, uint32_t mmap_end) {
+  memory_map_t *next = (memory_map_t *)(mmap->size + (uintptr_t)mmap + sizeof(mmap->size));
+
+  return (uintptr_t)next < mmap_end ? next : NULL;
+}
 
 enum memory_map_type {
   MMAP_AVAILABLE = 1,
