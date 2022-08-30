@@ -35,13 +35,6 @@ add_library(stand STATIC
   strtok.c
   strtoull.c
   qdivrem.c
-
-  # tinf library
-  tinflate.c
-  tinfgzip.c
-  tinfzlib.c
-  adler32.c
-  crc32.c
   )
 
 target_include_directories(stand PUBLIC include/)

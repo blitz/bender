@@ -3,8 +3,6 @@
 #include <mbi.h>
 #include <stddef.h>
 #include <util.h>
-#include <tinf.h>
-
 
 /** Find a sufficiently large block of free memory that is page aligned.
  */
@@ -97,39 +95,17 @@ mbi_alloc_protected_memory(struct mbi *multiboot_info, size_t len, unsigned alig
 
 
 /**
- * Returns true of module is compressed and can be inflated. Inflated
- * size is returned in uncompressed.
- */
-static bool
-gzip_info(struct module *mod, size_t *uncompressed)
-{
-  int ret = tinf_gzip_uncompress(NULL, uncompressed,
-                                 (void *)mod->mod_start,
-                                 mod->mod_end - mod->mod_start);
-  return (ret == TINF_OK);
-}
-
-/**
- * Push all modules to the highest location in memory.  This is
- * somewhat EXPERIMENTAL. If uncompress is true, we transparently
- * uncompress all modules. If uncompress is set and relocation fails,
- * we consider this as fatal error (panic).
+ * Push all modules to the highest available location in memory below phys_max.
  */
 void
-mbi_relocate_modules(struct mbi *mbi, bool uncompress, uint64_t phys_max)
+mbi_relocate_modules(struct mbi *mbi, uint64_t phys_max)
 {
   size_t size = 0;
-  bool need_inflate = false;
-
-  if (uncompress)
-    tinf_init();
 
   struct module *mods = (struct module *)mbi->mods_addr;
   struct {
     size_t modlen;
     size_t slen;
-    size_t inflated_size;
-    bool   do_inflate;
   } minfo[mbi->mods_count];
 
   for (unsigned i = 0; i < mbi->mods_count; i++) {
@@ -137,11 +113,7 @@ mbi_relocate_modules(struct mbi *mbi, bool uncompress, uint64_t phys_max)
     minfo[i].modlen = mods[i].mod_end - mods[i].mod_start;
     minfo[i].slen   = strlen((const char *)mods[i].string) + 1;
 
-    minfo[i].do_inflate = uncompress && gzip_info(&mods[i], &minfo[i].inflated_size);
-    if (minfo[i].do_inflate)
-      need_inflate = true;
-
-    size += minfo[i].do_inflate ? minfo[i].inflated_size : minfo[i].modlen;
+    size += minfo[i].modlen;
     size += minfo[i].slen;
 
     /* Round up to page size */
@@ -158,11 +130,11 @@ mbi_relocate_modules(struct mbi *mbi, bool uncompress, uint64_t phys_max)
       if (mods[i].mod_end > reladdr) {
         if (reladdr == mods[i].mod_start) {
           printf("Modules seem to be relocated. Good.\n");
-          goto silent_fail;
+          return;
         } else {
           printf("Modules might overlap.\nRelocate to %p, but module at %8x-%8x.\n",
                  reladdr, mods[i].mod_start, mods[i].mod_end-1);
-          goto fail;
+          return;
         }
       }
     }
@@ -171,21 +143,13 @@ mbi_relocate_modules(struct mbi *mbi, bool uncompress, uint64_t phys_max)
     printf("Relocating to %8x: \n", reladdr);
 
     for (int i = mbi->mods_count - 1; i >= 0; i--) {
-      size_t target_len = minfo[i].do_inflate ? minfo[i].inflated_size : minfo[i].modlen;
+      size_t target_len = minfo[i].modlen;
       block_len -= (minfo[i].slen + target_len + 0xFFF) & ~0xFFF;
 
-      if (minfo[i].do_inflate) {
-        size_t uncompressed;
-        printf("Inflating %u -> %u bytes...\n", minfo[i].modlen, target_len);
-        int res = tinf_gzip_uncompress((char *)block + block_len, &uncompressed,
-                                       (void *)mods[i].mod_start, minfo[i].modlen);
-        assert((res == TINF_OK) && (uncompressed == target_len),
-               "Error decompressing data.");
-      } else {
-        printf("Copying %u bytes...\n", minfo[i].modlen);
-        memcpy((char *)block + block_len, (void *)mods[i].mod_start,
-               minfo[i].modlen);
-      }
+      printf("Copying %u bytes...\n", minfo[i].modlen);
+      memcpy((char *)block + block_len, (void *)mods[i].mod_start,
+             minfo[i].modlen);
+
       mods[i].mod_start = (size_t)((char *)block + block_len);
       mods[i].mod_end = mods[i].mod_start + target_len;
 
@@ -196,10 +160,7 @@ mbi_relocate_modules(struct mbi *mbi, bool uncompress, uint64_t phys_max)
     printf("\n");
 
   } else {
-  fail:
-    printf("Cannot relocate.\n");
-  silent_fail:
-    assert(!need_inflate, "Couldn't relocate, which is required for decompressing.");
+    printf("Cannot relocate. Trying without...\n");
   }
 }
 
