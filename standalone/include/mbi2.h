@@ -61,12 +61,19 @@ _Static_assert(sizeof(struct mbi2_module) == 8);
 
 struct mbi2_memory
 {
+  uint32_t entry_size;
+  uint32_t entry_version;
+};
+_Static_assert(sizeof(struct mbi2_memory) == 8);
+
+struct mbi2_memory_entry
+{
   uint64_t addr;
   uint64_t len;
   uint32_t type;
   uint32_t reserved;
 };
-_Static_assert(sizeof(struct mbi2_memory) == 24);
+_Static_assert(sizeof(struct mbi2_memory_entry) == 24);
 
 static inline
 struct mbi2_tag * mbi2_tag_first(struct mbi2_boot_info *mbi)
@@ -81,5 +88,27 @@ struct mbi2_tag * mbi2_tag_next(struct mbi2_tag *c)
   struct mbi2_tag * n = (struct mbi2_tag *)((char *)c + offset);
   return (n->type == 0) ? 0 : n;
 }
+
+struct mbi2_builder {
+  char *start;
+  char *cur;
+  char *end;
+};
+
+/**
+ * Start building a Multiboot2 info structure.
+ */
+struct mbi2_builder mbi2_build(uint64_t phys_addr, size_t max_size);
+
+void mbi2_add_boot_cmdline(struct mbi2_builder *bld, const char *cmdline);
+void mbi2_add_module(struct mbi2_builder *bld, uint64_t mod_addr, uint64_t mod_end, const char *cmdline);
+
+struct memory_map;
+void mbi2_add_mbi1_memmap(struct mbi2_builder *bld, struct memory_map *mbi1_mmap, uint32_t mbi1_mmap_end);
+
+/**
+ * Finishes the construction of the Multiboot2 info and returns the physical address of its start.
+ */
+uint64_t mbi2_finish(struct mbi2_builder *bld);
 
 /* EOF */
