@@ -2,6 +2,7 @@
 
 #include <pci.h>
 #include <mbi.h>
+#include <mbi2.h>
 #include <util.h>
 #include <elf.h>
 #include <version.h>
@@ -78,6 +79,9 @@ main(uint32_t magic, struct mbi *mbi)
   if (magic == MBI_MAGIC) {
     if ((mbi->flags & MBI_FLAG_CMDLINE) != 0)
       parse_cmdline((const char *)mbi->cmdline);
+  } else if (magic == MBI2_MAGIC) {
+    printf("Multiboot2 is not supported. Please boot via Multiboot1. Bye.\n");
+    return 1;
   } else {
     printf("Not loaded by Multiboot-compliant loader. Bye.\n");
     return 1;
