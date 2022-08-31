@@ -58,6 +58,23 @@ gen_elf_segment(uint8_t **code, uintptr_t target, void *src, size_t len,
   byte_out(code, 0xAA);         /* STOSB */
 }
 
+static struct mbi2_boot_info *convert_mb1_to_mbi2(struct mbi *mbi, uint64_t phys_addr, size_t length)
+{
+    struct mbi2_builder bld = mbi2_build(phys_addr, length);
+
+    mbi2_add_boot_cmdline(&bld, (const char *)(uintptr_t)mbi->cmdline);
+    mbi2_add_mbi1_memmap(&bld, (struct memory_map *)mbi->mmap_addr, mbi->mmap_addr + mbi->mmap_length);
+
+    for (uint32_t mod_index = 0; mod_index < mbi->mods_count; mod_index++) {
+      struct module *mod = ((struct module *)(uintptr_t)mbi->mods_addr) + mod_index;
+
+      printf("Adding module %u: %s\n", mod_index, (const char *)(uintptr_t)mod->string);
+      mbi2_add_module(&bld, mod->mod_start, mod->mod_end, (const char *)(uintptr_t)mod->string);
+    }
+
+    return (struct mbi2_boot_info *)(uintptr_t)mbi2_finish(&bld);
+}
+
 int
 start_module(struct mbi *mbi, uint64_t phys_max)
 {
@@ -80,20 +97,7 @@ start_module(struct mbi *mbi, uint64_t phys_max)
 
   if (mbi2_header) {
     printf("Found MBI2 header. Booting as MBI2.\n");
-
-    struct mbi2_builder bld = mbi2_build(extra_space_addr, mbi2_extra_space_needed);
-
-    mbi2_add_boot_cmdline(&bld, (const char *)(uintptr_t)mbi->cmdline);
-    mbi2_add_mbi1_memmap(&bld, (struct memory_map *)mbi->mmap_addr, mbi->mmap_addr + mbi->mmap_length);
-
-    for (uint32_t mod_index = 0; mod_index < mbi->mods_count; mod_index++) {
-      struct module *mod = ((struct module *)(uintptr_t)mbi->mods_addr) + mod_index;
-
-      printf("Adding module %u: %s\n", mod_index, (const char *)(uintptr_t)mod->string);
-      mbi2_add_module(&bld, mod->mod_start, mod->mod_end, (const char *)(uintptr_t)mod->string);
-    }
-
-    mbi2_info = (struct mbi2_boot_info *)(uintptr_t)mbi2_finish(&bld);
+    mbi2_info = convert_mb1_to_mbi2(mbi, extra_space_addr, mbi2_extra_space_needed);
   } else {
     printf("Found no MBI2 header. Booting as MBI1.\n");
   }
