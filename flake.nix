@@ -6,7 +6,6 @@
     flake-compat = {
       url = "github:edolstra/flake-compat";
       flake = false;
-      follows = "nixpkgs";
     };
   };
 
