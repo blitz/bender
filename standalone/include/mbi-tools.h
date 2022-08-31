@@ -23,7 +23,6 @@
 #include <mbi.h>
 
 uint64_t mbi_relocate_modules(struct mbi *mbi, uint64_t phys_max, size_t extra_space);
-uint64_t mbi_pop_module(struct mbi *mbi);
-
+struct module mbi_pop_module(struct mbi *mbi);
 
 /* EOF */

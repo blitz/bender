@@ -94,12 +94,14 @@ start_module(struct mbi *mbi, uint64_t phys_max)
   const size_t mbi2_extra_space_needed = 16 << 10;
   const uint64_t extra_space_addr = mbi_relocate_modules(mbi, phys_max, mbi2_extra_space_needed);
 
-  uint64_t mod_start = mbi_pop_module(mbi);
-  assert((uintptr_t)mod_start == mod_start, "Module is beyond what we can access");
+  struct module mod = mbi_pop_module(mbi);
+  assert((uintptr_t)mod.mod_start == mod.mod_start, "Module is beyond what we can access");
 
+  // The command line of the module becomes the kernel command line.
+  mbi->cmdline = mod.string;
+  mbi->flags |= MBI_FLAG_CMDLINE;
 
-  /* XXX This should not look beyond the module. */
-  struct mbi2_header *mbi2_header = mbi2_header_find((void *)(uintptr_t)mod_start, MBI2_HEADER_BYTES);
+  struct mbi2_header *mbi2_header = mbi2_header_find((void *)(uintptr_t)mod.mod_start, mod.mod_end - mod.mod_start);
   struct mbi2_boot_info *mbi2_info = NULL;
 
   if (mbi2_header) {
@@ -109,7 +111,7 @@ start_module(struct mbi *mbi, uint64_t phys_max)
     printf("Found no MBI2 header. Booting as MBI1.\n");
   }
 
-  struct eh *elf = (struct eh *)(uintptr_t)mod_start;
+  struct eh *elf = (struct eh *)(uintptr_t)mod.mod_start;
   assert(memcmp(elf->e_ident, ELFMAG, SELFMAG) == 0, "ELF header incorrect");
 
   // We assume that memory is available at the location where the BIOS would usually execute boot blocks.
@@ -121,10 +123,10 @@ start_module(struct mbi *mbi, uint64_t phys_max)
     assert(sizeof(struct PH) <= elfc->e_phentsize, "e_phentsize too small"); \
                                                                         \
     for (unsigned i = 0; i < elfc->e_phnum; i++) {                      \
-      struct PH *ph = (struct PH *)(uintptr_t)(mod_start + elfc->e_phoff+ i*elfc->e_phentsize); \
+      struct PH *ph = (struct PH *)(uintptr_t)(mod.mod_start + elfc->e_phoff+ i*elfc->e_phentsize); \
       if (ph->p_type != 1)                                              \
         continue;                                                       \
-      gen_elf_segment(&code, ph->p_paddr, (void *)(uintptr_t)(mod_start+ph->p_offset), ph->p_filesz, \
+      gen_elf_segment(&code, ph->p_paddr, (void *)(uintptr_t)(mod.mod_start+ph->p_offset), ph->p_filesz, \
                       ph->p_memsz - ph->p_filesz);                      \
     }                                                                   \
                                                                         \
