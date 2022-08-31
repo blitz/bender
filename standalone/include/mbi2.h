@@ -22,6 +22,11 @@
 
 enum mbi2_enum
   {
+    MBI2_HEADER_MAGIC     = 0xe85250d6,
+
+    /* The MBI2 header must be within this many bytes in a file. */
+    MBI2_HEADER_BYTES     = 32768,
+
     MBI2_MAGIC            = 0x36d76289,
     MBI2_TAG_END          = 0,
     MBI2_TAG_CMDLINE      = 1,
@@ -36,6 +41,21 @@ enum mbi2_enum
     MBI2_TAG_EFI_IMAGE_32 = 19,
     MBI2_TAG_EFI_IMAGE_64 = 20,
   };
+
+struct mbi2_header
+{
+  uint32_t magic;
+  uint32_t architecture;
+  uint32_t header_length;
+  uint32_t checksum;
+};
+_Static_assert(sizeof(struct mbi2_header) == 16);
+
+static inline uint32_t mbi2_header_checksum(const struct mbi2_header *h) {
+  return h->magic + h->architecture + h->header_length + h->checksum;
+}
+
+struct mbi2_header *mbi2_header_find(void *data, size_t len);
 
 struct mbi2_boot_info
 {

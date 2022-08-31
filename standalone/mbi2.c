@@ -5,6 +5,21 @@
 #include <util.h>
 #include <mbi.h>
 
+struct mbi2_header *mbi2_header_find(void *data, size_t len)
+{
+  char *end = (char *)data + len;
+
+  for (char *cur = data; cur + sizeof(struct mbi2_header) <= end; cur += 8) {
+    struct mbi2_header *header = (struct mbi2_header *)cur;
+
+    if (header->magic == MBI2_HEADER_MAGIC && mbi2_header_checksum(header) == 0) {
+      return header;
+    }
+  }
+
+  return NULL;
+}
+
 enum {
   MBI2_TAG_ALIGNMENT = 8,
 };
