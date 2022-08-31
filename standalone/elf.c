@@ -85,7 +85,13 @@ start_module(struct mbi *mbi, uint64_t phys_max)
 
     mbi2_add_boot_cmdline(&bld, (const char *)(uintptr_t)mbi->cmdline);
     mbi2_add_mbi1_memmap(&bld, (struct memory_map *)mbi->mmap_addr, mbi->mmap_addr + mbi->mmap_length);
-    /* XXX Add modules */
+
+    for (uint32_t mod_index = 0; mod_index < mbi->mods_count; mod_index++) {
+      struct module *mod = ((struct module *)(uintptr_t)mbi->mods_addr) + mod_index;
+
+      printf("Adding module %u: %s\n", mod_index, (const char *)(uintptr_t)mod->string);
+      mbi2_add_module(&bld, mod->mod_start, mod->mod_end, (const char *)(uintptr_t)mod->string);
+    }
 
     mbi2_info = (struct mbi2_boot_info *)(uintptr_t)mbi2_finish(&bld);
   } else {
