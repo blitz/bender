@@ -15,6 +15,7 @@
 #include <elf.h>
 #include <util.h>
 #include <mbi-tools.h>
+#include <mbi2.h>
 
 enum {
   EAX, ECX, EDX, EBX, ESP, EBP, ESI, EDI
@@ -65,10 +66,31 @@ start_module(struct mbi *mbi, uint64_t phys_max)
     return -1;
   }
 
-  mbi_relocate_modules(mbi, phys_max, 0);
+  /* Reserve this much memory to build a MBI2 boot information. */
+  const size_t mbi2_extra_space_needed = 16 << 10;
+  const uint64_t extra_space_addr = mbi_relocate_modules(mbi, phys_max, mbi2_extra_space_needed);
 
   uint64_t mod_start = mbi_pop_module(mbi);
   assert((uintptr_t)mod_start == mod_start, "Module is beyond what we can access");
+
+
+  /* XXX This should not look beyond the module. */
+  struct mbi2_header *mbi2_header = mbi2_header_find((void *)(uintptr_t)mod_start, MBI2_HEADER_BYTES);
+  struct mbi2_boot_info *mbi2_info = NULL;
+
+  if (mbi2_header) {
+    printf("Found MBI2 header. Booting as MBI2.\n");
+
+    struct mbi2_builder bld = mbi2_build(extra_space_addr, mbi2_extra_space_needed);
+
+    /* XXX Add command line */
+    /* XXX Add memory map */
+    /* XXX Add modules */
+
+    mbi2_info = (struct mbi2_boot_info *)(uintptr_t)mbi2_finish(&bld);
+  } else {
+    printf("Found no MBI2 header. Booting as MBI1.\n");
+  }
 
   struct eh *elf = (struct eh *)(uintptr_t)mod_start;
   assert(memcmp(elf->e_ident, ELFMAG, SELFMAG) == 0, "ELF header incorrect");
@@ -103,12 +125,15 @@ start_module(struct mbi *mbi, uint64_t phys_max)
     assert(false, "Invalid ELF class");
   }
 
-  gen_mov(&code, EAX, 0x2BADB002);
+  gen_mov(&code, EAX, mbi2_header ? MBI2_MAGIC : MBI_MAGIC);
   gen_jmp_edx(&code);
-  asm volatile  ("jmp *%%edx" :: "a" (0), "d" (0x7C00), "b" (mbi));
 
-  /* NOT REACHED */
-  return 0;
+  assert(!mbi2_header || mbi2_info, "MBI2 info missing");
+  asm volatile ("jmp *%%edx"
+                : /* No outputs */
+                : "a" (0), "d" (0x7C00), "b" (mbi2_header ? (uintptr_t)mbi2_info : (uintptr_t)mbi));
+
+  __builtin_unreachable();
 }
 
 /* EOF */
