@@ -83,7 +83,7 @@ start_module(struct mbi *mbi, uint64_t phys_max)
 
     struct mbi2_builder bld = mbi2_build(extra_space_addr, mbi2_extra_space_needed);
 
-    /* XXX Add command line */
+    mbi2_add_boot_cmdline(&bld, (const char *)(uintptr_t)mbi->cmdline);
     /* XXX Add memory map */
     /* XXX Add modules */
 
