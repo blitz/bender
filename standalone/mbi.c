@@ -22,8 +22,8 @@ mbi_find_memory(const struct mbi *multiboot_info, size_t len,
        mmap != NULL;
        mmap = mbi_memory_map_next(mmap, mmap_end)) {
 
-    uint64_t block_len  = (uint64_t)mmap->length_high<<32 | mmap->length_low;
-    uint64_t block_addr = (uint64_t)mmap->base_addr_high<<32 | mmap->base_addr_low;
+    uint64_t block_len  = mbi_memory_length(mmap);
+    uint64_t block_addr = mbi_memory_base_addr(mmap);
 
     /* Memory blocks may not be page aligned. Round length and address
        to page granularity. */

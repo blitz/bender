@@ -68,6 +68,15 @@ typedef struct memory_map
   uint32_t type;
 } memory_map_t;
 
+static inline uint64_t mbi_memory_base_addr(memory_map_t *mmap)
+{
+  return (uint64_t)mmap->base_addr_high << 32 | mmap->base_addr_low;
+}
+
+static inline uint64_t mbi_memory_length(memory_map_t *mmap)
+{
+  return (uint64_t)mmap->length_high << 32 | mmap->length_low;
+}
 
 static inline memory_map_t *mbi_memory_map_next(memory_map_t *mmap, uint32_t mmap_end) {
   memory_map_t *next = (memory_map_t *)(mmap->size + (uintptr_t)mmap + sizeof(mmap->size));
