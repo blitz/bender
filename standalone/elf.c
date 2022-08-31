@@ -62,14 +62,21 @@ static struct mbi2_boot_info *convert_mb1_to_mbi2(struct mbi *mbi, uint64_t phys
 {
     struct mbi2_builder bld = mbi2_build(phys_addr, length);
 
-    mbi2_add_boot_cmdline(&bld, (const char *)(uintptr_t)mbi->cmdline);
-    mbi2_add_mbi1_memmap(&bld, (struct memory_map *)mbi->mmap_addr, mbi->mmap_addr + mbi->mmap_length);
+    if (mbi->flags & MBI_FLAG_CMDLINE) {
+      mbi2_add_boot_cmdline(&bld, (const char *)(uintptr_t)mbi->cmdline);
+    }
 
-    for (uint32_t mod_index = 0; mod_index < mbi->mods_count; mod_index++) {
-      struct module *mod = ((struct module *)(uintptr_t)mbi->mods_addr) + mod_index;
+    if (mbi->flags & MBI_FLAG_MEM) {
+      mbi2_add_mbi1_memmap(&bld, (struct memory_map *)mbi->mmap_addr, mbi->mmap_addr + mbi->mmap_length);
+    }
 
-      printf("Adding module %u: %s\n", mod_index, (const char *)(uintptr_t)mod->string);
-      mbi2_add_module(&bld, mod->mod_start, mod->mod_end, (const char *)(uintptr_t)mod->string);
+    if (mbi->flags & MBI_FLAG_MODS) {
+      for (uint32_t mod_index = 0; mod_index < mbi->mods_count; mod_index++) {
+        struct module *mod = ((struct module *)(uintptr_t)mbi->mods_addr) + mod_index;
+
+        printf("Adding module %u: %s\n", mod_index, (const char *)(uintptr_t)mod->string);
+        mbi2_add_module(&bld, mod->mod_start, mod->mod_end, (const char *)(uintptr_t)mod->string);
+      }
     }
 
     return (struct mbi2_boot_info *)(uintptr_t)mbi2_finish(&bld);
