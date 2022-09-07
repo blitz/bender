@@ -49,8 +49,11 @@ target_link_libraries(basicperf PRIVATE stand)
 add_executable(amy amy.c)
 target_link_libraries(amy PRIVATE stand)
 
+add_executable(mbi2_example mbi2_example.c)
+target_link_libraries(mbi2_example PRIVATE stand)
+
 install(
-  TARGETS bender basicperf
+  TARGETS bender basicperf mbi2_example
   DESTINATION share/bender
   PERMISSIONS OWNER_READ
   )
