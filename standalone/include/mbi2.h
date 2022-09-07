@@ -19,6 +19,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <util.h>
 
 enum mbi2_enum
   {
@@ -64,12 +65,30 @@ struct mbi2_boot_info
 };
 _Static_assert(sizeof(struct mbi2_boot_info) == 8);
 
+/*
+ * Each entry of the Multiboot2 information structure is a tag. This struct is the header of each tag.
+ *
+ * To get to the payload, use mbi2_tag_payload.
+ */
 struct mbi2_tag
 {
   uint32_t type;
   uint32_t size;
 };
 _Static_assert(sizeof(struct mbi2_tag) == 8);
+
+/*
+ * Returns the payload of a tag.
+ *
+ * The returned pointer needs to be cast to the correct structure type depending on the tag type.
+ * The payload types are below.
+ */
+static inline
+void * mbi2_tag_payload(struct mbi2_tag *tag)
+{
+  /* The payload is located directly after the tag. */
+  return tag + 1;
+}
 
 struct mbi2_module
 {
@@ -94,6 +113,32 @@ struct mbi2_memory_entry
   uint32_t reserved;
 };
 _Static_assert(sizeof(struct mbi2_memory_entry) == 24);
+
+/**
+ * Returns the first memory map entry from the memory map.
+ */
+static inline
+struct mbi2_memory_entry *mbi2_memory_map_first(struct mbi2_tag *mem_tag)
+{
+  assert(mem_tag->type == MBI2_TAG_MEMORY, "Need memory tag, but got something else");
+  struct mbi2_memory *mem = mbi2_tag_payload(mem_tag);
+
+  return (struct mbi2_memory_entry *)(mem + 1);
+}
+
+/**
+ * Returns the next memory map entry.
+ */
+static inline
+struct mbi2_memory_entry *mbi2_memory_map_next(struct mbi2_tag *mem_tag, struct mbi2_memory_entry *mem_entry)
+{
+  assert(mem_tag->type == MBI2_TAG_MEMORY, "Need memory tag, but got something else");
+  struct mbi2_memory *mem = mbi2_tag_payload(mem_tag);
+  struct mbi2_memory_entry *end = (struct mbi2_memory_entry *)((char *)mem_tag + mem_tag->size);
+  struct mbi2_memory_entry *next = (struct mbi2_memory_entry *)((char *)mem_entry + mem->entry_size);
+
+  return next < end ? next : NULL;
+}
 
 static inline
 struct mbi2_tag * mbi2_tag_first(struct mbi2_boot_info *mbi)
