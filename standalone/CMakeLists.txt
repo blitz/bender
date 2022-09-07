@@ -14,6 +14,7 @@ add_link_options(
 add_library(stand STATIC
   elf.c
   mbi.c
+  mbi2.c
   pci.c
   pci_db.c
   printf.c
