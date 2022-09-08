@@ -10,6 +10,9 @@ and updates the [BIOS Data
 Area](https://wiki.osdev.org/BDA#BIOS_Data_Area_.28BDA.29) to make
 them discoverable by legacy software.
 
+Additionally, bender will move modules to a higher location in
+physical memory to avoid clashes when ELFs are unpacked.
+
 ## Building with Nix (Recommended)
 
 Get [Nix](https://nixos.org/nix/) and type:
@@ -42,7 +45,8 @@ You will find `bender` in `standalone/` in your build directory.
 
 Check the documentation of your Multiboot-capable boot loader to see
 how Bender is booted. Bender will discover serial ports and then boot
-the next boot module as multiboot kernel.
+the next boot module as Multiboot2 or Multiboot1 kernel depending on
+what it supports.
 
 ## Parameters
 
@@ -51,7 +55,8 @@ Bender supports the following command-line parameters:
 - `promisc`: Be more forgiving which PCI serial controller to
   accept. Specifically, this makes Bender claim any PCI device with
   "Simple Communication Controller" PCI class and not only those
-  claiming to be a legacy serial controller.
+  claiming to be a legacy serial controller. This is typically needed
+  for some multiport PCI serial adapters.
 - `accept_legacy`: Don't claim a PCI serial controller, if the BIOS
   already indicates that there is a legacy serial controller
   available.
