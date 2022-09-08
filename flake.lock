@@ -16,6 +16,22 @@
         "type": "github"
       }
     },
+    "hedronSrc": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1662033445,
+        "narHash": "sha256-0+pYzDjQa2hG2cRBtb+IRY0sQKTLXNHp73ff7KmW2ck=",
+        "owner": "cyberus-technology",
+        "repo": "hedron",
+        "rev": "0be6dcf05158198f43361718ef9a25be8b9d38c7",
+        "type": "github"
+      },
+      "original": {
+        "owner": "cyberus-technology",
+        "repo": "hedron",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1661700591,
@@ -35,6 +51,7 @@
     "root": {
       "inputs": {
         "flake-compat": "flake-compat",
+        "hedronSrc": "hedronSrc",
         "nixpkgs": "nixpkgs"
       }
     }
