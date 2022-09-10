@@ -1,18 +1,16 @@
 #include <mbi.h>
 #include <mbi2.h>
-#include <util.h>
 #include <serial.h>
+#include <util.h>
 
 __attribute__((used, aligned(8))) const struct mbi2_header mbi2_header = {
-  .magic = MBI2_HEADER_MAGIC,
-  .architecture = 0,
-  .header_length = sizeof(struct mbi2_header),
-  .checksum = -(MBI2_HEADER_MAGIC + sizeof(struct mbi2_header)),
+    .magic = MBI2_HEADER_MAGIC,
+    .architecture = 0,
+    .header_length = sizeof(struct mbi2_header),
+    .checksum = -(MBI2_HEADER_MAGIC + sizeof(struct mbi2_header)),
 };
 
-int
-main(uint32_t magic, struct mbi2_boot_info *mbi)
-{
+int main(uint32_t magic, struct mbi2_boot_info *mbi) {
   serial_init();
 
   if (magic == MBI2_MAGIC) {
@@ -27,7 +25,8 @@ main(uint32_t magic, struct mbi2_boot_info *mbi)
 
   printf("Loaded with Multiboot2 loader.\n");
 
-  for (struct mbi2_tag *tag = mbi2_tag_first(mbi); tag != NULL; tag = mbi2_tag_next(tag)) {
+  for (struct mbi2_tag *tag = mbi2_tag_first(mbi); tag != NULL;
+       tag = mbi2_tag_next(tag)) {
     printf("Tag %02d: ", tag->type);
 
     switch (tag->type) {
@@ -37,12 +36,15 @@ main(uint32_t magic, struct mbi2_boot_info *mbi)
     case MBI2_TAG_MEMORY:
       printf("memory map\n");
       for (struct mbi2_memory_entry *mem_entry = mbi2_memory_map_first(tag);
-           mem_entry != NULL; mem_entry = mbi2_memory_map_next(tag, mem_entry)) {
-        printf(" type=%02d addr=%llx len=%llx\n", mem_entry->type, mem_entry->addr, mem_entry->len);
+           mem_entry != NULL;
+           mem_entry = mbi2_memory_map_next(tag, mem_entry)) {
+        printf(" type=%02d addr=%llx len=%llx\n", mem_entry->type,
+               mem_entry->addr, mem_entry->len);
       }
       break;
     case MBI2_TAG_MODULE:
-      printf("module cmdline='%s'\n", ((struct mbi2_module *)mbi2_tag_payload(tag))->string);
+      printf("module cmdline='%s'\n",
+             ((struct mbi2_module *)mbi2_tag_payload(tag))->string);
       break;
     default:
       printf("unknown\n", tag->type);

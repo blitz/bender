@@ -1,42 +1,29 @@
 /* -*- Mode: C -*- */
 
-#include <pci.h>
-#include <util.h>
 #include <elf.h>
-#include <version.h>
-#include <serial.h>
 #include <mbi-tools.h>
+#include <pci.h>
+#include <serial.h>
+#include <util.h>
+#include <version.h>
 
-static void
-t_empty(void)
-{
-}
+static void t_empty(void) {}
 
-static void
-t_cpuid(void)
-{
+static void t_cpuid(void) {
   uint32_t eax = 0;
-  asm volatile ("cpuid" : "+a" (eax) :: "ecx", "edx", "ebx");
+  asm volatile("cpuid" : "+a"(eax)::"ecx", "edx", "ebx");
 }
 
-static void
-t_portio(void)
-{
-  inb(0x60);                    /* keyboard */
-}
+static void t_portio(void) { inb(0x60); /* keyboard */ }
 
-static void
-t_mmio(void)
-{
+static void t_mmio(void) {
   ((volatile uint32_t *)0xFEE00000)[1]; /* APIC reg 1 */
 }
 
-static void
-t_rdmsr(void)
-{
+static void t_rdmsr(void) {
   uint32_t eax, edx;
   /* RDMSR to MTRR_CAP */
-  asm volatile ("rdmsr" : "=a"(eax), "=d"(edx) : "c"(0xfe)); 
+  asm volatile("rdmsr" : "=a"(eax), "=d"(edx) : "c"(0xfe));
 }
 
 struct test {
@@ -45,22 +32,16 @@ struct test {
 };
 
 static const struct test tests[] = {
-  { "empty ",  t_empty },
-  { "cpuid ", t_cpuid },
-  { "portio", t_portio },
-  { "mmio  ", t_mmio },
-  { "rdmsr ", t_rdmsr },
+    {"empty ", t_empty}, {"cpuid ", t_cpuid}, {"portio", t_portio},
+    {"mmio  ", t_mmio},  {"rdmsr ", t_rdmsr},
 };
 
-static float sqrtf(float v)
-{
-  asm ("fsqrt" : "+t" (v));
+static float sqrtf(float v) {
+  asm("fsqrt" : "+t"(v));
   return v;
 }
 
-int
-main(uint32_t magic, struct mbi *mbi)
-{
+int main(uint32_t magic, struct mbi *mbi) {
   serial_init();
 
   if (magic != MBI_MAGIC) {
@@ -76,7 +57,7 @@ main(uint32_t magic, struct mbi *mbi)
   static uint32_t results[2048];
   memset(results, 0, sizeof(results)); /* Warmup */
 
-  for (unsigned i = 0; i < sizeof(tests)/sizeof(tests[0]); i++) {
+  for (unsigned i = 0; i < sizeof(tests) / sizeof(tests[0]); i++) {
     unsigned retries = 0;
     uint64_t start, end;
 
@@ -94,22 +75,24 @@ main(uint32_t magic, struct mbi *mbi)
 
     uint64_t sum = 0;
     uint32_t min = ~0UL;
-    uint32_t max =  0UL;
+    uint32_t max = 0UL;
 
     for (unsigned j = 0; j < tries; j++) {
       sum += results[j];
-      min  = MIN(min, results[j]);
-      max  = MAX(max, results[j]);
+      min = MIN(min, results[j]);
+      max = MAX(max, results[j]);
     }
 
     float mean = (float)sum / tries;
 
     float sqdiff = 0;
-    for (unsigned j = 0; j < tries; j++) sqdiff += (mean - results[j])*(mean - results[j]);
-    float stddev = sqrtf(sqdiff/tries);
+    for (unsigned j = 0; j < tries; j++)
+      sqdiff += (mean - results[j]) * (mean - results[j]);
+    float stddev = sqrtf(sqdiff / tries);
 
     if ((retries++ < 5) && (stddev > max_stddev)) {
-      printf("Retry test %s because of instability: stddev %u\n", tests[i].name, (uint32_t)stddev);
+      printf("Retry test %s because of instability: stddev %u\n", tests[i].name,
+             (uint32_t)stddev);
       goto again;
     }
 

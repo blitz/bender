@@ -3,9 +3,7 @@
 #include <asm.h>
 #include <util.h>
 
-static inline void
-kb_wait(void)
-{
+static inline void kb_wait(void) {
   for (int i = 0; i < 0x10000; i++) {
     if ((inb(0x64) & 0x02) == 0)
       break;
@@ -13,9 +11,7 @@ kb_wait(void)
   }
 }
 
-void
-reboot(void)
-{
+void reboot(void) {
   out_string("Reset!\n");
   for (int i = 0; i < 10; i++) {
     kb_wait();
@@ -25,7 +21,8 @@ reboot(void)
 
   /* If we get here, reboot didn't work... */
   out_string("Reboot didn't work.\n");
-  while (1) {}
+  while (1) {
+  }
 }
 
 /* EOF */
