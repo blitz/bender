@@ -19,10 +19,11 @@
 
 #pragma once
 
-#include <stdint.h>
 #include <mbi.h>
+#include <stdint.h>
 
-uint64_t mbi_relocate_modules(struct mbi *mbi, uint64_t phys_max, size_t extra_space);
+uint64_t mbi_relocate_modules(struct mbi *mbi, uint64_t phys_max,
+                              size_t extra_space);
 struct module mbi_pop_module(struct mbi *mbi);
 
 /* EOF */

@@ -19,8 +19,8 @@
 
 #pragma once
 
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 struct bios_data_area {
   uint16_t com_port[4];
@@ -32,18 +32,13 @@ struct bios_data_area {
      description. */
 };
 
-static inline unsigned
-serial_ports(struct bios_data_area *bda)
-{
+static inline unsigned serial_ports(struct bios_data_area *bda) {
   /* XXX At least my test box always returns 0, so this seems not to
      be reliable. */
   return (bda->equipment >> 9) & 0x7;
 }
 
-
-static inline struct bios_data_area *
-get_bios_data_area(void)
-{
+static inline struct bios_data_area *get_bios_data_area(void) {
   return (struct bios_data_area *)0x400;
 }
 

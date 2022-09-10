@@ -9,7 +9,8 @@
 #include <util.h>
 #include <version.h>
 
-static void parse_cmdline(const char *cmdline) { /* Nothing here yet. */ }
+static void parse_cmdline(const char *cmdline) { /* Nothing here yet. */
+}
 
 static void probe_legacy(void) {
   struct bios_data_area *bda = get_bios_data_area();

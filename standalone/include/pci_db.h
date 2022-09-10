@@ -31,12 +31,14 @@ struct pci_db_entry {
 enum controller_quirks {
   NO_QUIRKS = 0,
 
-  /* The device's serial ports are not at the start of BAR0, but at an offset of 0xC0. */
+  /* The device's serial ports are not at the start of BAR0, but at an offset of
+     0xC0. */
   QUIRK_SERIAL_BAR0_OFFSET_C0 = 1 << 0,
 
   /* ... */
 };
 
-const struct pci_db_entry * pci_lookup_device(uint16_t vendor_id, uint16_t device_id);
+const struct pci_db_entry *pci_lookup_device(uint16_t vendor_id,
+                                             uint16_t device_id);
 
 /* EOF */
