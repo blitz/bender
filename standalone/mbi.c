@@ -59,7 +59,7 @@ mbi_find_memory(const struct mbi *multiboot_info, size_t len,
 /**
  * Push all modules to the highest available location in memory below phys_max.
  *
- * With extra_space additional memory behind the modules can be requested. The
+ * extra_space requests additional memory in front of the modules.
  */
 uint64_t
 mbi_relocate_modules(struct mbi *mbi, uint64_t phys_max, size_t extra_space)
