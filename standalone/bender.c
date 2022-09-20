@@ -1,30 +1,30 @@
 /* -*- Mode: C -*- */
 
-#include <pci.h>
+#include <bda.h>
+#include <elf.h>
 #include <mbi.h>
 #include <mbi2.h>
-#include <util.h>
-#include <elf.h>
-#include <version.h>
+#include <pci.h>
 #include <serial.h>
-#include <bda.h>
+#include <util.h>
+#include <version.h>
 
 /*
  * Configuration (set by command line parser)
  */
 
-/* If true, accepts any device with SIMPLE_COMM class, not just serial controllers. This might do the wrong thing. */
+/* If true, accepts any device with SIMPLE_COMM class, not just serial
+ * controllers. This might do the wrong thing. */
 static bool be_promisc = false;
 
-/* Don't look for PCI serial controllers, if the BIOS indicates that we have legacy COM ports. */
+/* Don't look for PCI serial controllers, if the BIOS indicates that we have
+ * legacy COM ports. */
 static bool accept_legacy = false;
 
 /* Upper limit of where we are willing to relocate modules. */
 static uint64_t phys_max_relocate = 1ULL << 31; /* below 2G */
 
-static void
-parse_cmdline(const char *cmdline)
-{
+static void parse_cmdline(const char *cmdline) {
   char *last_ptr = NULL;
   char cmdline_buf[256];
   char *token;
@@ -32,8 +32,7 @@ parse_cmdline(const char *cmdline)
 
   strncpy(cmdline_buf, cmdline, sizeof(cmdline_buf));
 
-  for (token = strtok_r(cmdline_buf, " ", &last_ptr), i = 0;
-       token != NULL;
+  for (token = strtok_r(cmdline_buf, " ", &last_ptr), i = 0; token != NULL;
        token = strtok_r(NULL, " ", &last_ptr), i++) {
 
     /* Our name is not interesting. */
@@ -50,8 +49,7 @@ parse_cmdline(const char *cmdline)
   }
 }
 
-static uint16_t apply_quirks(struct pci_device *pcid, uint16_t raw_iobase)
-{
+static uint16_t apply_quirks(struct pci_device *pcid, uint16_t raw_iobase) {
   uint16_t iobase = raw_iobase;
   if (pcid->db->quirks & QUIRK_SERIAL_BAR0_OFFSET_C0) {
     printf("Found XR16850 chip. Adding 0xc0 to iobase offset.\n");
@@ -61,21 +59,16 @@ static uint16_t apply_quirks(struct pci_device *pcid, uint16_t raw_iobase)
   return iobase;
 }
 
-static bool
-is_serial_controller(struct pci_device *dev)
-{
-  return pci_matches_class(dev, PCI_CLASS_SIMPLE_COMM, PCI_SUBCLASS_SERIAL_CTRL);
+static bool is_serial_controller(struct pci_device *dev) {
+  return pci_matches_class(dev, PCI_CLASS_SIMPLE_COMM,
+                           PCI_SUBCLASS_SERIAL_CTRL);
 }
 
-static bool
-is_simple_comm(struct pci_device *dev)
-{
+static bool is_simple_comm(struct pci_device *dev) {
   return pci_matches_class(dev, PCI_CLASS_SIMPLE_COMM, PCI_SUBCLASS_ANY);
 }
 
-int
-main(uint32_t magic, struct mbi *mbi)
-{
+int main(uint32_t magic, struct mbi *mbi) {
   if (magic == MBI_MAGIC) {
     if ((mbi->flags & MBI_FLAG_CMDLINE) != 0)
       parse_cmdline((const char *)mbi->cmdline);
@@ -92,7 +85,7 @@ main(uint32_t magic, struct mbi *mbi)
 
   printf("Promisc is %s.\n", be_promisc ? "on" : "off");
 
-  uint16_t *com0_port      = (uint16_t *)(get_bios_data_area());
+  uint16_t *com0_port = (uint16_t *)(get_bios_data_area());
   uint16_t *equipment_word = &get_bios_data_area()->equipment;
 
   if (accept_legacy && ((*equipment_word & 0x7) != 0)) {
@@ -107,7 +100,9 @@ main(uint32_t magic, struct mbi *mbi)
   struct pci_device dev;
   struct pci_device serial_ctrl;
 
-  while ((found_ctrl = pci_iter_next_matching(&iter, be_promisc ? is_simple_comm : is_serial_controller, &dev))) {
+  while (
+      (found_ctrl = pci_iter_next_matching(
+           &iter, be_promisc ? is_simple_comm : is_serial_controller, &dev))) {
     found_matching_ctrl = true;
     memcpy(&serial_ctrl, &dev, sizeof(serial_ctrl));
   }
@@ -131,13 +126,14 @@ main(uint32_t magic, struct mbi *mbi)
 
   if (iobase != 0) {
     printf("Patching BDA with I/O port 0x%x.\n", iobase);
-    *com0_port      = iobase;
-    *equipment_word = (*equipment_word & ~(0xF << 9)) | (1 << 9); /* One COM port available */
+    *com0_port = iobase;
+    *equipment_word =
+        (*equipment_word & ~(0xF << 9)) | (1 << 9); /* One COM port available */
   } else {
     printf("I/O ports for controller not found.\n");
   }
 
- boot_next:
+boot_next:
 
   if (serial_ports(get_bios_data_area()))
     serial_init();

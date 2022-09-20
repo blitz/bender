@@ -19,47 +19,53 @@
 
 #pragma once
 
-#include <stddef.h>
-#include <stdbool.h>
 #include <stdarg.h>
+#include <stdbool.h>
+#include <stddef.h>
 
 #include "asm.h"
 
-#define assert(X, msg, args...)						\
-  do {									\
-    if (!(X)) {								\
-      printf ("Assertion \"%s\" failed at %s:%d\n" msg, #X,		\
-	      __FILE__, __LINE__, ## args);				\
-      __exit(0xbad);							\
-    }									\
+#define assert(X, msg, args...)                                                \
+  do {                                                                         \
+    if (!(X)) {                                                                \
+      printf("Assertion \"%s\" failed at %s:%d\n" msg, #X, __FILE__, __LINE__, \
+             ##args);                                                          \
+      __exit(0xbad);                                                           \
+    }                                                                          \
   } while (0)
 
+#define MAX(a, b)                                                              \
+  ({                                                                           \
+    typeof(a) _a = (a);                                                        \
+    typeof(b) _b = (b);                                                        \
+    _a > _b ? _a : _b;                                                         \
+  })
 
-#define MAX(a, b) ({ typeof (a) _a = (a); \
-      typeof (b) _b = (b);		  \
-      _a > _b ? _a : _b; })
-
-#define MIN(a, b) ({ typeof (a) _a = (a); \
-      typeof (b) _b = (b);		  \
-      _a > _b ? _b : _a; })
+#define MIN(a, b)                                                              \
+  ({                                                                           \
+    typeof(a) _a = (a);                                                        \
+    typeof(b) _b = (b);                                                        \
+    _a > _b ? _b : _a;                                                         \
+  })
 
 /// Returns the number of elements in an array (not its size in bytes).
-#define ARRAY_SIZE(a) (sizeof(a)/sizeof(a[0]))
+#define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
 
 char *strtok_r(char *s, const char *delim, char **save_ptr);
 char *strtok(char *s, const char *delim);
-unsigned long long strtoull(const char * __restrict nptr, char ** __restrict endptr, int base);
+unsigned long long strtoull(const char *__restrict nptr,
+                            char **__restrict endptr, int base);
 int strncmp(const char *s1, const char *s2, size_t n);
 int strcmp(const char *s1, const char *s2);
-char *strcpy(char * __restrict dst, const char * __restrict src);
-char *strncpy(char * __restrict dst, const char * __restrict src, size_t n);
+char *strcpy(char *__restrict dst, const char *__restrict src);
+char *strncpy(char *__restrict dst, const char *__restrict src, size_t n);
 size_t strlen(const char *s);
 void *memcpy(void *dest, const void *src, size_t n);
 void *memset(void *s, int c, size_t n);
 int memcmp(const void *s1, const void *s2, size_t n);
 
 /* Low-level output functions */
-int  out_char(unsigned value);
+int out_char(unsigned value);
 void out_string(const char *value);
 
 /* Poor man's isspace */

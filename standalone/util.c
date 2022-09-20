@@ -12,9 +12,8 @@
  * COPYING file for details.
  */
 
-
-#include <stdarg.h>
 #include <serial.h>
+#include <stdarg.h>
 #include <util.h>
 
 /**
@@ -22,39 +21,35 @@
  *
  * We use the PIT for this.
  */
-void
-wait(int ms)
-{
+void wait(int ms) {
   /* the PIT counts with 1.193 Mhz */
-  ms*=1193;
+  ms *= 1193;
 
   /* initalize the PIT, let counter0 count from 256 backwards */
-  outb(0x43,0x14);
-  outb(0x40,0);
+  outb(0x43, 0x14);
+  outb(0x40, 0);
 
   unsigned char state;
   unsigned char old = 0;
-  while (ms>0)
-    {
-      outb(0x43,0);
-      state = inb(0x40);
-      ms -= (unsigned char)(old - state);
-      old = state;
-    }
+  while (ms > 0) {
+    outb(0x43, 0);
+    state = inb(0x40);
+    ms -= (unsigned char)(old - state);
+    old = state;
+  }
 }
 
 /**
  * Print the exit status and reboot the machine.
  */
-_Noreturn void __attribute__((regparm(1)))
-__exit(unsigned status)
-{
+_Noreturn void __attribute__((regparm(1))) __exit(unsigned status) {
   const unsigned delay = 300;
 
   printf("\nExit with status %u.\n"
-         "Rebooting...\n", status);
+         "Rebooting...\n",
+         status);
 
-  for (unsigned i=0; i<delay;i++) {
+  for (unsigned i = 0; i < delay; i++) {
     wait(1000);
     out_char('.');
   }
@@ -68,25 +63,20 @@ __exit(unsigned status)
  * Output a single char.
  * Note: We allow only to put a char on the last line.
  */
-int
-out_char(unsigned value)
-{
-#define BASE(ROW) ((unsigned short *) (0xb8000+ROW*160))
+int out_char(unsigned value) {
+#define BASE(ROW) ((unsigned short *)(0xb8000 + ROW * 160))
   static unsigned int col;
-  if (value!='\n')
-    {
-      unsigned short *p = BASE(24)+col;
-      *p = 0x0f00 | value;
-      col++;
-    }
-  if (col>=80 || value == '\n')
-    {
-      col=0;
-      unsigned short *p=BASE(0);
-      memcpy(p, p+80, 24*160);
-      memset(BASE(24), 0, 160);
-    }
-
+  if (value != '\n') {
+    unsigned short *p = BASE(24) + col;
+    *p = 0x0f00 | value;
+    col++;
+  }
+  if (col >= 80 || value == '\n') {
+    col = 0;
+    unsigned short *p = BASE(0);
+    memcpy(p, p + 80, 24 * 160);
+    memset(BASE(24), 0, 160);
+  }
 
   serial_send(value);
 
@@ -96,14 +86,11 @@ out_char(unsigned value)
   return value;
 }
 
-
 /**
  * Output a string.
  */
-void
-out_string(const char *value)
-{
-  for(; *value; value++)
+void out_string(const char *value) {
+  for (; *value; value++)
     out_char(*value);
 }
 

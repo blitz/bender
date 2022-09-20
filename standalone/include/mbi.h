@@ -22,19 +22,16 @@
 #include <stddef.h>
 #include <stdint.h>
 
-enum mbi_enum
-  {
-    MBI_MAGIC                  = 0x2badb002,
-    MBI_FLAG_MEM               = 1 << 0,
-    MBI_FLAG_CMDLINE           = 1 << 2,
-    MBI_FLAG_MODS              = 1 << 3,
-    MBI_FLAG_MMAP              = 1 << 6,
-    MBI_FLAG_BOOT_LOADER_NAME  = 1 << 9,
-  };
+enum mbi_enum {
+  MBI_MAGIC = 0x2badb002,
+  MBI_FLAG_MEM = 1 << 0,
+  MBI_FLAG_CMDLINE = 1 << 2,
+  MBI_FLAG_MODS = 1 << 3,
+  MBI_FLAG_MMAP = 1 << 6,
+  MBI_FLAG_BOOT_LOADER_NAME = 1 << 9,
+};
 
-
-struct mbi
-{
+struct mbi {
   uint32_t flags;
   uint32_t mem_lower;
   uint32_t mem_upper;
@@ -49,17 +46,14 @@ struct mbi
   uint32_t boot_loader_name;
 };
 
-
-struct module
-{
+struct module {
   uint32_t mod_start;
   uint32_t mod_end;
   uint32_t string;
   uint32_t reserved;
 };
 
-typedef struct memory_map
-{
+typedef struct memory_map {
   uint32_t size;
   uint32_t base_addr_low;
   uint32_t base_addr_high;
@@ -68,18 +62,18 @@ typedef struct memory_map
   uint32_t type;
 } memory_map_t;
 
-static inline uint64_t mbi_memory_base_addr(memory_map_t *mmap)
-{
+static inline uint64_t mbi_memory_base_addr(memory_map_t *mmap) {
   return (uint64_t)mmap->base_addr_high << 32 | mmap->base_addr_low;
 }
 
-static inline uint64_t mbi_memory_length(memory_map_t *mmap)
-{
+static inline uint64_t mbi_memory_length(memory_map_t *mmap) {
   return (uint64_t)mmap->length_high << 32 | mmap->length_low;
 }
 
-static inline memory_map_t *mbi_memory_map_next(memory_map_t *mmap, uint32_t mmap_end) {
-  memory_map_t *next = (memory_map_t *)(mmap->size + (uintptr_t)mmap + sizeof(mmap->size));
+static inline memory_map_t *mbi_memory_map_next(memory_map_t *mmap,
+                                                uint32_t mmap_end) {
+  memory_map_t *next =
+      (memory_map_t *)(mmap->size + (uintptr_t)mmap + sizeof(mmap->size));
 
   return (uintptr_t)next < mmap_end ? next : NULL;
 }

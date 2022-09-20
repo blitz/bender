@@ -26,9 +26,7 @@
 
 static const char *hex = "0123456789abcdef";
 
-void
-vprintf(const char *fmt, va_list ap)
-{
+void vprintf(const char *fmt, va_list ap) {
   char buf[64];
   char *s;
   unsigned long long ull;
@@ -36,14 +34,14 @@ vprintf(const char *fmt, va_list ap)
   enum { PLAIN, INFMT } state = PLAIN;
   unsigned longness = 0;
   unsigned fill = 0;
-  
+
   while ((c = *fmt++)) {
-    
+
     switch (state) {
     case PLAIN:
 
       longness = 0;
-      fill     = 0;
+      fill = 0;
 
       switch (c) {
       case '%':
@@ -54,7 +52,7 @@ vprintf(const char *fmt, va_list ap)
         out_char(c);
         break;
       }
-      break;                    /* case PLAIN */
+      break; /* case PLAIN */
     case INFMT:
       switch (c) {
       case '0' ... '9':
@@ -64,54 +62,52 @@ vprintf(const char *fmt, va_list ap)
         longness++;
         break;
       case 'c':
-	out_char(va_arg(ap, int));
+        out_char(va_arg(ap, int));
         state = PLAIN;
         break;
       case 's':
         out_string(va_arg(ap, char *));
         state = PLAIN;
-	break;
-      case 'd':       /* A lie, always prints unsigned */
+        break;
+      case 'd': /* A lie, always prints unsigned */
       case 'u':
         if (longness < 2)
           ull = va_arg(ap, unsigned);
         else
           ull = va_arg(ap, unsigned long long);
-	s = buf;
-	do
-	  *s++ = '0' + ull % 10U;
-	while (ull /= 10U);
+        s = buf;
+        do
+          *s++ = '0' + ull % 10U;
+        while (ull /= 10U);
       dumpbuf:;
         while ((s - buf) < fill--)
           out_char('0');
-	while (--s >= buf) {
+        while (--s >= buf) {
           out_char(*s);
         }
         state = PLAIN;
-	break;
+        break;
       case 'p':
       case 'x':
         if (longness < 2)
           ull = va_arg(ap, unsigned);
         else
           ull = va_arg(ap, unsigned long long);
-	s = buf;
-	do
-	  *s++ = hex[ull & 0xF];
-	while (ull >>= 4);
-	goto dumpbuf;
+        s = buf;
+        do
+          *s++ = hex[ull & 0xF];
+        while (ull >>= 4);
+        goto dumpbuf;
       }
 
-      break;                    /* case INFMT */
+      break; /* case INFMT */
     }
   }
-  
+
   return;
 }
 
-void
-printf(const char *fmt,...)
-{
+void printf(const char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
   vprintf(fmt, ap);

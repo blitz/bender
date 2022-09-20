@@ -2,9 +2,7 @@
 
 #include <util.h>
 
-int
-memcmp(const void *s1, const void *s2, size_t n)
-{
+int memcmp(const void *s1, const void *s2, size_t n) {
   const char *p1 = s1;
   const char *p2 = s2;
   int res = 0;

@@ -1,29 +1,25 @@
 /* -*- Mode: C -*- */
 
-#include <stdint.h>
-#include <util.h>
+#include <bda.h>
 #include <mbi.h>
 #include <mbi2.h>
-#include <version.h>
-#include <serial.h>
-#include <bda.h>
 #include <pci.h>
+#include <serial.h>
+#include <stdint.h>
+#include <util.h>
+#include <version.h>
 
-static void
-parse_cmdline(const char *cmdline)
-{
-  /* Nothing here yet. */
+static void parse_cmdline(const char *cmdline) { /* Nothing here yet. */
 }
 
-static void
-probe_legacy(void)
-{
+static void probe_legacy(void) {
   struct bios_data_area *bda = get_bios_data_area();
 
   for (size_t i = 0; i < ARRAY_SIZE(bda->com_port); i++) {
     uint16_t port = bda->com_port[i];
 
-    /* At least on Qemu unused COM ports have a port number of 0. Also misaligned port numbers are bogus. */
+    /* At least on Qemu unused COM ports have a port number of 0. Also
+     * misaligned port numbers are bogus. */
     if (port == 0 || ((port & 0x7) != 0)) {
       printf("Skipping COM%zu at port %x.\n", i + 1, port);
       continue;
@@ -38,14 +34,12 @@ probe_legacy(void)
   }
 }
 
-static bool
-is_serial_controller(struct pci_device *dev)
-{
-  return pci_matches_class(dev, PCI_CLASS_SIMPLE_COMM, PCI_SUBCLASS_SERIAL_CTRL);
+static bool is_serial_controller(struct pci_device *dev) {
+  return pci_matches_class(dev, PCI_CLASS_SIMPLE_COMM,
+                           PCI_SUBCLASS_SERIAL_CTRL);
 }
 
-static uint16_t apply_quirks(struct pci_device *pcid, uint16_t raw_iobase)
-{
+static uint16_t apply_quirks(struct pci_device *pcid, uint16_t raw_iobase) {
   uint16_t iobase = raw_iobase;
   if (pcid->db->quirks & QUIRK_SERIAL_BAR0_OFFSET_C0) {
     printf("Found XR16850 chip. Adding 0xc0 to iobase offset.\n");
@@ -55,9 +49,7 @@ static uint16_t apply_quirks(struct pci_device *pcid, uint16_t raw_iobase)
   return iobase;
 }
 
-static void
-probe_pci(void)
-{
+static void probe_pci(void) {
   struct pci_iter iter = PCI_ITER_INIT;
   struct pci_device dev;
 
@@ -74,14 +66,13 @@ probe_pci(void)
     iobase = apply_quirks(&dev, iobase);
 
     serial_init_port(iobase);
-    printf("Probing PCI serial controller %lx at port %x...\n", dev.cfg_address, iobase);
+    printf("Probing PCI serial controller %lx at port %x...\n", dev.cfg_address,
+           iobase);
     serial_disable();
   }
 }
 
-int
-main(uint32_t magic, struct mbi *mbi)
-{
+int main(uint32_t magic, struct mbi *mbi) {
   if (magic == MBI_MAGIC) {
     if ((mbi->flags & MBI_FLAG_CMDLINE) != 0)
       parse_cmdline((const char *)mbi->cmdline);
