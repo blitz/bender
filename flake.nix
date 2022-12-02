@@ -2,7 +2,7 @@
   description = "Bender the serial port bender";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-22.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-22.11";
     flake-compat = {
       url = "github:edolstra/flake-compat";
       flake = false;
@@ -34,7 +34,7 @@
         hedron = (import "${hedronSrc}/nix/release.nix" {
           sources = null;
           pkgs = nixpkgs.legacyPackages.x86_64-linux;
-        }).hedron.default-release;
+        }).hedron.builds.default-release;
       in {
         bender-tests =
           nixpkgs.legacyPackages.x86_64-linux.callPackage ./nix/tests.nix {
