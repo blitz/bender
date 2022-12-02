@@ -11,5 +11,5 @@ stdenv.mkDerivation rec {
 
   nativeBuildInputs = [ cmake ];
   cmakeBuildType = buildType;
-  cmakeFlags = "-DVERSION=${version}";
+  cmakeFlags = [ "-DVERSION=${version}" ];
 }
