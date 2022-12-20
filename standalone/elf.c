@@ -12,6 +12,7 @@
  * COPYING file for details.
  */
 
+#include <acpi.h>
 #include <elf.h>
 #include <mbi-tools.h>
 #include <mbi2.h>
@@ -72,6 +73,13 @@ convert_mb1_to_mbi2(struct mbi *mbi, uint64_t phys_addr, size_t length) {
       mbi2_add_module(&bld, mod->mod_start, mod->mod_end,
                       (const char *)(uintptr_t)mod->string);
     }
+  }
+
+  /* Even some non-UEFI payloads require the RSDP to be provided by the
+   * Multiboot2 loader. */
+  struct rsdp *rsdp = acpi_get_rsdp();
+  if (rsdp) {
+    mbi2_add_rsdp(&bld, rsdp);
   }
 
   return (struct mbi2_boot_info *)(uintptr_t)mbi2_finish(&bld);
