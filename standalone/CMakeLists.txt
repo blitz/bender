@@ -12,6 +12,7 @@ add_link_options(
   )
 
 add_library(stand STATIC
+  acpi.c
   elf.c
   mbi.c
   mbi2.c
