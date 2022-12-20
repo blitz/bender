@@ -150,8 +150,8 @@ void mbi2_add_rsdp(struct mbi2_builder *bld, struct rsdp *rsdp) {
   size_t rsdp_len = rsdp->rev == 1 ? 20 : rsdp->size;
 
   struct mbi2_tag tag = {
-    .type = rsdp->rev == 1 ? MBI2_TAG_RSDP_V1 : MBI2_TAG_RSDP_V2,
-    .size = sizeof(struct mbi2_tag) + rsdp_len,
+      .type = rsdp->rev == 1 ? MBI2_TAG_RSDP_V1 : MBI2_TAG_RSDP_V2,
+      .size = sizeof(struct mbi2_tag) + rsdp_len,
   };
 
   mbi2_add_blob(bld, MBI2_TAG_ALIGNMENT, &tag, sizeof(tag));
