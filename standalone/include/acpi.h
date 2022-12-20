@@ -95,24 +95,7 @@ struct dmar {
 };
 
 char acpi_checksum(const char *table, size_t count);
-void acpi_fix_checksum(struct acpi_table *tab);
 
 struct rsdp *acpi_get_rsdp(void);
-struct acpi_table **acpi_get_table_ptr(struct acpi_table *rsdt,
-                                       const char signature[4]);
-
-static inline struct dmar_entry *acpi_dmar_next(struct dmar_entry *cur) {
-  return (struct dmar_entry *)((char *)cur + cur->size);
-}
-
-static inline bool acpi_in_table(struct acpi_table *tab, const void *p) {
-  return ((uintptr_t)tab + tab->size) > (uintptr_t)p;
-}
-
-typedef void *(*memory_alloc_t)(size_t len, unsigned align);
-
-struct acpi_table *acpi_dup_table(struct acpi_table *rsdt,
-                                  const char signature[4],
-                                  memory_alloc_t alloc);
 
 /* EOF */
