@@ -20,9 +20,9 @@
 
 #pragma once
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <stdbool.h>
 
 struct rsdp {
   char signature[8];
@@ -39,8 +39,8 @@ struct rsdp {
 struct acpi_table {
   char signature[4];
   uint32_t size;
-  uint8_t  rev;
-  uint8_t  checksum;
+  uint8_t rev;
+  uint8_t checksum;
   char oemid[6];
   char oemtabid[8];
   uint32_t oemrev;
@@ -56,12 +56,12 @@ struct device_scope {
   uint8_t start_bus;
   /* XXX Hardcode PCI device scope: path = (device, function) */
   uint8_t path[2];
-  //uint8_t path[];
+  // uint8_t path[];
 } __attribute__((packed));
 
 enum {
-  TYPE_DMAR          = 0,
-  TYPE_RMRR          = 1,
+  TYPE_DMAR = 0,
+  TYPE_RMRR = 1,
   SCOPE_PCI_ENDPOINT = 1,
 };
 
@@ -98,17 +98,21 @@ char acpi_checksum(const char *table, size_t count);
 void acpi_fix_checksum(struct acpi_table *tab);
 
 struct rsdp *acpi_get_rsdp(void);
-struct acpi_table **acpi_get_table_ptr(struct acpi_table *rsdt, const char signature[4]);
+struct acpi_table **acpi_get_table_ptr(struct acpi_table *rsdt,
+                                       const char signature[4]);
 
-static inline struct dmar_entry *acpi_dmar_next(struct dmar_entry *cur)
-{ return (struct dmar_entry *)((char *)cur + cur->size); }
+static inline struct dmar_entry *acpi_dmar_next(struct dmar_entry *cur) {
+  return (struct dmar_entry *)((char *)cur + cur->size);
+}
 
-static inline bool acpi_in_table(struct acpi_table *tab, const void *p)
-{ return ((uintptr_t)tab + tab->size) > (uintptr_t)p; }
+static inline bool acpi_in_table(struct acpi_table *tab, const void *p) {
+  return ((uintptr_t)tab + tab->size) > (uintptr_t)p;
+}
 
 typedef void *(*memory_alloc_t)(size_t len, unsigned align);
 
-struct acpi_table *acpi_dup_table(struct acpi_table *rsdt, const char signature[4],
-				  memory_alloc_t alloc);
+struct acpi_table *acpi_dup_table(struct acpi_table *rsdt,
+                                  const char signature[4],
+                                  memory_alloc_t alloc);
 
 /* EOF */
