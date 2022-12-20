@@ -48,52 +48,6 @@ struct acpi_table {
   uint32_t crev;
 } __attribute__((packed));
 
-struct device_scope {
-  uint8_t type;
-  uint8_t size;
-  uint16_t _res;
-  uint8_t enum_id;
-  uint8_t start_bus;
-  /* XXX Hardcode PCI device scope: path = (device, function) */
-  uint8_t path[2];
-  // uint8_t path[];
-} __attribute__((packed));
-
-enum {
-  TYPE_DMAR = 0,
-  TYPE_RMRR = 1,
-  SCOPE_PCI_ENDPOINT = 1,
-};
-
-struct dmar_entry {
-  uint16_t type;
-  uint16_t size;
-
-  union {
-    struct {
-      uint32_t _res;
-      uint64_t phys;
-    } dmar;
-    /* If we include more than RMRRs here, we need to fix the DMAR
-       duplication code in zapp.c */
-    struct rmrr {
-      uint16_t _res;
-      uint16_t segment;
-      uint64_t base;
-      uint64_t limit;
-      struct device_scope first_scope;
-    } rmrr;
-  };
-} __attribute__((packed));
-
-struct dmar {
-  struct acpi_table generic;
-  uint8_t host_addr_width;
-  uint8_t flags;
-  char _res[10];
-  struct dmar_entry first_entry;
-};
-
 char acpi_checksum(const char *table, size_t count);
 
 struct rsdp *acpi_get_rsdp(void);
