@@ -164,6 +164,9 @@ struct memory_map;
 void mbi2_add_mbi1_memmap(struct mbi2_builder *bld,
                           struct memory_map *mbi1_mmap, uint32_t mbi1_mmap_end);
 
+struct rsdp;
+void mbi2_add_rsdp(struct mbi2_builder *bld, struct rsdp *rsdp);
+
 /**
  * Finishes the construction of the Multiboot2 info and returns the physical
  * address of its start.

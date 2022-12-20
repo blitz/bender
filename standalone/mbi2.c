@@ -2,6 +2,7 @@
 
 #include <mbi2.h>
 
+#include <acpi.h>
 #include <mbi.h>
 #include <util.h>
 
@@ -142,6 +143,19 @@ void mbi2_add_mbi1_memmap(struct mbi2_builder *bld,
 
     mbi2_add_blob(bld, 1, &mem_entry, sizeof(mem_entry));
   }
+}
+
+void mbi2_add_rsdp(struct mbi2_builder *bld, struct rsdp *rsdp) {
+  /* We have to account for the final NUL byte. */
+  size_t rsdp_len = rsdp->rev == 1 ? 20 : rsdp->size;
+
+  struct mbi2_tag tag = {
+    .type = rsdp->rev == 1 ? MBI2_TAG_RSDP_V1 : MBI2_TAG_RSDP_V2,
+    .size = sizeof(struct mbi2_tag) + rsdp_len,
+  };
+
+  mbi2_add_blob(bld, MBI2_TAG_ALIGNMENT, &tag, sizeof(tag));
+  mbi2_add_blob(bld, 1, rsdp, rsdp_len);
 }
 
 uint64_t mbi2_finish(struct mbi2_builder *bld) {
