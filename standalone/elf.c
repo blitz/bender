@@ -79,6 +79,7 @@ convert_mb1_to_mbi2(struct mbi *mbi, uint64_t phys_addr, size_t length) {
    * Multiboot2 loader. */
   struct rsdp *rsdp = acpi_get_rsdp();
   if (rsdp) {
+    printf("Adding RSDP info: %p (%d) -> %lx\n", rsdp, rsdp->rev, rsdp->rsdt);
     mbi2_add_rsdp(&bld, rsdp);
   }
 
