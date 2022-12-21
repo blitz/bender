@@ -1,6 +1,7 @@
 /* -*- Mode: C -*- */
 
 #include <acpi.h>
+#include <bda.h>
 #include <stddef.h>
 #include <util.h>
 
@@ -19,13 +20,12 @@ char acpi_checksum(const char *table, size_t count) {
 /**
  * Return the rsdp.
  */
-struct rsdp *acpi_get_rsdp(void) {
+const struct rsdp *acpi_get_rsdp(void) {
   __label__ done;
-  struct rsdp *ret = 0;
+  const struct rsdp *ret = 0;
 
   void check(char *p) {
     if ((memcmp(p, "RSD PTR ", 8) == 0) && (acpi_checksum(p, 20) == 0)) {
-      // ret = (char *)(((uint32_t *)p)[4]);
       ret = (struct rsdp *)p;
       goto done;
     }
@@ -36,8 +36,8 @@ struct rsdp *acpi_get_rsdp(void) {
       check((char *)cur);
   }
 
-  find(0x40e, 0x400);     /* BDA */
-  find(0xe0000, 0x20000); /* BIOS read-only memory */
+  find((uintptr_t)get_bios_data_area(), 0x400); /* BDA */
+  find(0xe0000, 0x20000);                       /* BIOS read-only memory */
 
 done:
   return ret;

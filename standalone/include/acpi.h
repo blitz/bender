@@ -35,6 +35,7 @@ struct rsdp {
   uint8_t ext_checksum;
   char _res[3];
 } __attribute__((packed));
+_Static_assert(sizeof(struct rsdp) == 36, "Invalid RSDP layout");
 
 struct acpi_table {
   char signature[4];
@@ -50,6 +51,6 @@ struct acpi_table {
 
 char acpi_checksum(const char *table, size_t count);
 
-struct rsdp *acpi_get_rsdp(void);
+const struct rsdp *acpi_get_rsdp(void);
 
 /* EOF */
