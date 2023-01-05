@@ -145,7 +145,7 @@ void mbi2_add_mbi1_memmap(struct mbi2_builder *bld,
   }
 }
 
-void mbi2_add_rsdp(struct mbi2_builder *bld, struct rsdp *rsdp) {
+void mbi2_add_rsdp(struct mbi2_builder *bld, const struct rsdp *rsdp) {
   /* We have to account for the final NUL byte. */
   size_t rsdp_len = rsdp->rev == 1 ? 20 : rsdp->size;
 

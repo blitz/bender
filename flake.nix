@@ -3,6 +3,8 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-22.11";
+    flake-parts.url = "github:hercules-ci/flake-parts";
+
     flake-compat = {
       url = "github:edolstra/flake-compat";
       flake = false;
@@ -10,11 +12,6 @@
     hedronSrc = {
       url = "github:cyberus-technology/hedron";
       flake = false;
-    };
-
-    flake-parts = {
-      url = "github:hercules-ci/flake-parts";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     pre-commit-hooks-nix = {
