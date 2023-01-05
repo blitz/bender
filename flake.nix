@@ -69,6 +69,10 @@
         pre-commit.settings = {
           hooks = {
             nixpkgs-fmt.enable = true;
+            clang-format = {
+              enable = true;
+              types_or = [ "c" "c++" ];
+            };
           };
         };
 
