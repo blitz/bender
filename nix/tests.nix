@@ -1,5 +1,6 @@
 { runCommand, bender, expect, qemu, strace, hedron }:
-runCommand "bender-tests" {
+runCommand "bender-tests"
+{
   nativeBuildInputs = [ expect qemu ];
 } ''
   mkdir -p $out

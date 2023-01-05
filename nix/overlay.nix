@@ -1,5 +1,5 @@
 final: prev:
 
 {
-  bender = final.callPackage ./build.nix {};
+  bender = final.callPackage ./build.nix { };
 }

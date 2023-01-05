@@ -1,1 +1,1 @@
-(import ./nix/release.nix {}).shell
+(import ./nix/release.nix { }).shell

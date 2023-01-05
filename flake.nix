@@ -16,12 +16,21 @@
       url = "github:hercules-ci/flake-parts";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    pre-commit-hooks-nix = {
+      url = "github:hercules-ci/pre-commit-hooks.nix/flakeModule";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = inputs@{ self, nixpkgs, flake-compat, hedronSrc, flake-parts }:
+  outputs = inputs@{ self, nixpkgs, flake-compat, hedronSrc, flake-parts, pre-commit-hooks-nix }:
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = [
         "x86_64-linux"
+      ];
+
+      imports = [
+        inputs.pre-commit-hooks-nix.flakeModule
       ];
 
       perSystem = { config, pkgs, ... }: {
@@ -57,11 +66,21 @@
               };
           };
 
+        pre-commit.settings = {
+          hooks = {
+            nixpkgs-fmt.enable = true;
+          };
+        };
+
         devShells.default = pkgs.mkShell {
           inputsFrom = [ config.packages.bender ];
           packages = [ pkgs.cmakeCurses pkgs.nixfmt ];
 
           hardeningDisable = [ "all" ];
+
+          shellHook = ''
+            ${config.pre-commit.installationScript}
+          '';
         };
       };
 
