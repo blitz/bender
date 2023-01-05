@@ -7,6 +7,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2.4.0
-    - uses: cachix/install-nix-action@v17
-    - run: nix build
-    - run: nix flake check
+    - uses: cachix/install-nix-action@v18
+    - run: nix -L build
+    - run: nix -L flake check
