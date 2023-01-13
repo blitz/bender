@@ -2,7 +2,7 @@
 
 stdenv.mkDerivation rec {
   pname = "bender";
-  version = "1.2.0-devel";
+  version = "1.3.99-devel";
 
   src = ./..;
 
