@@ -147,7 +147,7 @@ void mbi2_add_mbi1_memmap(struct mbi2_builder *bld,
 
 void mbi2_add_rsdp(struct mbi2_builder *bld, const struct rsdp *rsdp) {
   /* We have to account for the final NUL byte. */
-  size_t rsdp_len = rsdp->rev == 1 ? 20 : rsdp->size;
+  size_t rsdp_len = rsdp->rev <= 1 ? 20 : rsdp->size;
 
   struct mbi2_tag tag = {
       .type = rsdp->rev == 1 ? MBI2_TAG_RSDP_V1 : MBI2_TAG_RSDP_V2,
